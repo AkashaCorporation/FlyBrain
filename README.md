@@ -128,7 +128,7 @@ brain.reset(seed=0)          # zero state, keep interventions
 
 A bounded k-hop in-and-out neighbourhood around the stimulus neurons (plus any
 `--subset-seed`), relabelled but keeping FlyWire IDs. Fast enough to iterate on:
-seconds per simulated second on CPU.
+milliseconds per simulated second on CPU.
 
 ```bash
 flybrain run --mode subset --duration-ms 1000 --stimulus sugar_grn --subset-max-neurons 8000
@@ -136,9 +136,19 @@ flybrain run --mode subset --duration-ms 1000 --stimulus sugar_grn --subset-max-
 
 ### `whole-brain`
 
-All 127 400 neurons and all 14 687 178 edges. Measured on the development machine
-(Windows 11, i7-7700K, 16 GB RAM, no usable GPU): **204 ms/step**, i.e. about 34
-minutes per simulated second at `dt = 0.1 ms`. It runs; it is not fast.
+All 127 400 neurons and all 14 687 178 edges, measured on the development machine
+(Windows 11, i7-7700K, 16 GB RAM, no usable GPU):
+
+| | value |
+|---|---|
+| measured step cost | **196 ms/step** |
+| throughput | 5.1 steps/s |
+| 1000 ms of simulated time | **32.7 min** |
+| estimated peak memory | **0.366 GB** |
+| a dense connectivity matrix would need | **64.9 GB** |
+
+It runs; it is not fast. See [`docs/STATUS.md`](docs/STATUS.md) for the full
+measurement and for the identified bottleneck.
 
 ```bash
 flybrain run --mode whole-brain --duration-ms 1000 --stimulus sugar_grn --max-minutes 120
@@ -147,12 +157,12 @@ flybrain run --mode whole-brain --duration-ms 1000 --stimulus sugar_grn --max-mi
 **If whole-brain cannot run safely, FlyBrain refuses rather than quietly shrinking.**
 It estimates the memory requirement by component, compares it against 60 % of
 *available* (not total) RAM, prints the estimate, exits with code **3**, and simulates
-nothing:
+nothing — not even a run directory:
 
 ```
 $ flybrain run --mode whole-brain --duration-ms 60000 --max-minutes 1
-REFUSED: estimated runtime 34.0 min exceeds the configured limit of 1.0 min
-         (204.2 ms/step measured, 600000 steps x 1 trial)
+REFUSED: estimated runtime 2548.4 min exceeds the configured limit of 1.0 min
+         (254.8 ms/step measured, 600000 steps x 1 trial)
 ```
 
 Pass `--allow-fallback` to get a subset instead — every artefact then records

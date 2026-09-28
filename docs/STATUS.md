@@ -24,7 +24,7 @@ artefact or command that produced the evidence.
 | 9 | activity propagates through the network | **DONE** | Sugar run: 253 active neurons from 21 stimulated. Monosynaptic reachability: **211 directed edges / 2 729 synapses** from the sugar GRNs onto the responders. `outputs/experiments/sugar_stimulation/sugar_stimulation.json`. Delay propagation verified to arrive at exactly the configured delay: `test_synaptic_input_arrives_exactly_after_the_delay`. |
 | 10 | neurons/populations can be silenced | **DONE** | `brain.silence("mn9")` / `--silence mn9`. Silencing experiment: MN9 88.0 → 94.5 Hz, `sez_bract` 46.0 → 49.0 Hz, with 3 direct edges from MN9 onto the changed populations. `outputs/experiments/silencing_test/silencing_test.json`. Semantics verified against the published results: the silenced neuron keeps spiking. |
 | 11 | activity can be recorded | **DONE** | Four opt-in channels; `spikes.parquet`, `population_activity.parquet`, `voltage_samples.parquet`, `summary.json`. Truncation is reported, never silent (`test_recorder_truncation_is_flagged_not_silent`). Recorded spike rows are cross-checked against the network's own counter inside the sugar experiment. |
-| 12 | results can be plotted | **DONE** | `flybrain/analysis/plots.py`: population rates over time, spike raster, top populations, input-vs-downstream comparison, membrane-potential traces. Every title carries `simulated activity - not a biological measurement`, asserted by `test_plots_carry_the_simulated_activity_tag`. Written to `outputs/*/plots/`. |
+| 12 | results can be plotted | **DONE** | `flybrain/analysis/plots.py`: population rates over time, spike raster, top populations, input-vs-downstream comparison, membrane-potential traces. Figures are produced by the runner, so the CLI, every packaged experiment and the Python API all get them (an earlier design put plotting in the CLI only, and the experiments silently produced none — that is fixed and now asserted). Eight figures are present under `outputs/experiments/*/plots/` and `outputs/experiments/silencing_test/input_vs_downstream.png`, all verified non-blank (9–21 % ink coverage). Every title carries `simulated activity - not a biological measurement`, asserted by `test_plots_carry_the_simulated_activity_tag`. |
 | 13 | dataset provenance is recorded | **DONE** | `data/metadata/flywire_630.json` and `flywire_783.json`: per-file SHA-256, sizes, source URL, release, retrieval timestamp. `docs/DATA_PROVENANCE.md`. |
 | 14 | experiment provenance is recorded | **DONE** | Every run writes `config.json`, `environment.json` (hardware, backend, git revision, dependency versions), `dataset.json`, `summary.json`, `run.log`. Two identical runs give an identical `spike_digest_sha256` (`test_two_identical_runs_produce_the_same_spike_digest`). |
 | 15 | tests pass | **DONE** | See "Test suite" below. |
@@ -61,10 +61,10 @@ artefact or command that produced the evidence.
 
 ```
 $ pytest -q
-145 passed
+147 passed
 ```
 
-All 145 tests pass, and `ruff check --select F,E9` is clean. The suite is organised so
+All 147 tests pass, and `ruff check --select F,E9` is clean. The suite is organised so
 that the physics is checked against *independent* expectations rather than against the
 implementation's own output:
 
@@ -142,10 +142,13 @@ claim is to run the matched protocol (30 trials, same conditions) and compare th
 *distribution*, which costs roughly 16 hours at the measured 196 ms/step and **has not
 been run**. One number matching to 1.5 % is encouraging; it is not proof.
 
-The subset run of the same protocol gives MN9-left **97.5 Hz**, 45 % above the
+The subset run of the same protocol gives MN9-left **88.0 Hz**, 31 % above the
 published value — because a truncated subset removes part of MN9's convergent input.
 That contrast is itself informative: it shows that convergence, not a single pathway,
-is what drives this network, and it is why every subset result is labelled.
+is what drives this network, and it is why every subset result is labelled. (An
+earlier subset figure of 97.5 Hz is not quoted, because it came from a run whose
+`--subset-seed` had displaced the stimulus neurons from the working set; that bug is
+fixed.)
 
 ---
 
@@ -270,7 +273,7 @@ What is not established:
 * different RNG (Brian 2's `PoissonInput` versus NumPy PCG64), so different Poisson
   realisations — the sugar GRN rate itself differs (105.6 vs 98.8 Hz) before any
   downstream effect is considered;
-* a side-by-side subset run of the same protocol gives MN9-left **97.5 Hz**, i.e. 45 %
+* a side-by-side subset run of the same protocol gives MN9-left **88.0 Hz**, i.e. 31 %
   *above* the published value, purely because a truncated subset removes part of MN9's
   convergent input. So the model's readout is sensitive to which inputs are present,
   and the agreement in the whole-brain case should be read with that in mind;

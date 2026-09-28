@@ -508,11 +508,11 @@ def cmd_run(args) -> int:
     )
 
     _print_run_summary(result, args)
-    if not args.no_plots:
-        try:
-            _write_plots(result, stimuli)
-        except FlyBrainError as exc:
-            print(f"(plots skipped: {exc})", file=sys.stderr)
+    plots = result.summary.get("plots") or []
+    for name in plots:
+        print(f"  plot              {result.run_dir / 'plots' / name}")
+    if result.summary.get("plots_error"):
+        print(f"  (plots skipped: {result.summary['plots_error']})", file=sys.stderr)
     return 0
 
 
@@ -536,6 +536,7 @@ def _run_config_from_args(args) -> RunConfig:
         disable_recurrence=bool(args.disable_recurrence),
         run_id=args.run_id,
         quiet_log=bool(args.quiet),
+        make_plots=not bool(args.no_plots),
     )
 
 
@@ -576,26 +577,6 @@ def _stimuli_of(summary: Dict[str, Any]) -> List[Stimulus]:
     from .runtime.runner import plan_stimuli
 
     return plan_stimuli(summary)
-
-
-def _write_plots(result, stimuli: Sequence[Stimulus]) -> List[Path]:
-    import pandas as pd
-
-    from .analysis import plot_summary_dashboard
-
-    rd = result.run_dir
-    spikes_df = pd.read_parquet(result.spikes_path) if result.spikes_path else None
-    pop_df = pd.read_parquet(result.population_path) if result.population_path else None
-    if pop_df is None and spikes_df is None:
-        return []
-    stim_pops = [s.label for s in stimuli if s.label]
-    paths = plot_summary_dashboard(
-        result.summary, spikes_df, pop_df, rd / "plots",
-        stimulus_populations=stim_pops,
-    )
-    for p in paths:
-        print(f"  plot              {p}")
-    return paths
 
 
 def cmd_experiments(args) -> int:

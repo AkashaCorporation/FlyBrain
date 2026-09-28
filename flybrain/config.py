@@ -107,6 +107,7 @@ class RunConfig:
     run_id: Optional[str] = None
     notes: str = ""
     quiet_log: bool = False
+    make_plots: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

@@ -80,6 +80,7 @@ def build_run_config(args, **overrides) -> RunConfig:
         subset_max_neurons=getattr(args, "subset_max_neurons", 5000),
         subset_seed_ids=list(getattr(args, "subset_seed", None) or []),
         quiet_log=bool(getattr(args, "quiet", False)),
+        make_plots=not bool(getattr(args, "no_plots", False)),
     )
     kwargs.update(overrides)
     cfg = RunConfig(**kwargs)

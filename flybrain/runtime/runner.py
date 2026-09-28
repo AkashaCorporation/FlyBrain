@@ -651,6 +651,8 @@ def run_experiment(
     )
 
     if write_outputs:
+        # Everything except summary.json, which must be written *after* plotting so
+        # that it can list the figures actually produced.
         _write_outputs(
             result, cfg, plan, connectome, hw, backend, params,
             spikes_df, pop_df, volt_df,
@@ -658,9 +660,73 @@ def run_experiment(
         result.spikes_path = run_dir / "spikes.parquet" if spikes_df is not None else None
         result.population_path = run_dir / "population_activity.parquet" if pop_df is not None else None
         result.voltage_path = run_dir / "voltage_samples.parquet" if volt_df is not None else None
+
+        # Figures are produced here rather than by each caller, so that every path
+        # into a run - CLI, packaged experiment, Python API - gets them. They are
+        # built from the in-memory frames, so plotting costs no re-read.
+        summary["plots"] = []
+        if cfg.make_plots:
+            try:
+                written = _write_plots(result, stimuli, connectome, spikes_df, pop_df, volt_df)
+                summary["plots"] = [p.name for p in written]
+                if written:
+                    log(f"wrote {len(written)} figure(s) to {run_dir / 'plots'}")
+            except Exception as exc:  # missing matplotlib, or an unlucky figure
+                summary["plots_error"] = f"{type(exc).__name__}: {exc}"
+                log(f"plots skipped: {type(exc).__name__}: {exc}")
+
+        result.summary = summary
+        (run_dir / "summary.json").write_text(
+            json.dumps(summary, indent=2) + "\n", encoding="utf-8"
+        )
         log(f"wrote artefacts to {run_dir}")
 
     return result
+
+
+def _write_plots(result, stimuli, connectome, spikes_df, pop_df, volt_df) -> List[Path]:
+    """Render the standard figure set for a run into ``<run_dir>/plots``."""
+    from ..analysis import plot_summary_dashboard, plot_voltage_trace
+
+    if spikes_df is None and pop_df is None:
+        return []
+
+    plot_dir = result.run_dir / "plots"
+    stimulus_populations = [s.label for s in stimuli if s.label]
+
+    # Highlight one representative neuron per stimulated population in the raster, so
+    # the figure shows the driven neurons separately from the responders.
+    highlight: Dict[str, int] = {}
+    for s in stimuli:
+        if not s.label:
+            continue
+        present, _missing = connectome.filter_present(list(s.neuron_ids))
+        if present.size:
+            highlight[f"stim {s.label}"] = int(present[0])
+
+    written = plot_summary_dashboard(
+        result.summary, spikes_df, pop_df, plot_dir,
+        stimulus_populations=stimulus_populations,
+        highlight=highlight or None,
+    )
+    if volt_df is not None:
+        p = plot_voltage_trace(volt_df, plot_dir / "membrane_potential.png")
+        if p is not None:
+            written.append(p)
+    return written
+
+
+def plot_condition_comparison(conditions: Dict[str, Dict[str, float]], out_path: Path,
+                              *, populations: Optional[Sequence[str]] = None) -> Optional[Path]:
+    """Input-vs-downstream comparison across named experimental conditions.
+
+    Used by the silencing experiment, where the two conditions are *the same stimulus*
+    with and without a perturbation - the figure that makes the causal comparison
+    readable at a glance.
+    """
+    from ..analysis import plot_input_vs_downstream
+
+    return plot_input_vs_downstream(conditions, out_path, populations=populations)
 
 
 def _label_of(stimuli: Sequence[Stimulus]) -> str:
@@ -843,7 +909,8 @@ def _write_outputs(
     }
     (rd / "dataset.json").write_text(json.dumps(ds_blob, indent=2) + "\n", encoding="utf-8")
 
-    (rd / "summary.json").write_text(json.dumps(result.summary, indent=2) + "\n", encoding="utf-8")
+    # summary.json is intentionally NOT written here: the caller writes it after
+    # plotting, so that it can list the figures that were actually produced.
 
     if spikes_df is not None:
         spikes_df.to_parquet(rd / "spikes.parquet", compression="brotli", index=False)

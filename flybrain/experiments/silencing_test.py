@@ -211,6 +211,23 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
         print(f"{d['population']:<24} {d['baseline_hz']:>12.2f} {d['silenced_hz']:>12.2f} "
               f"{d['delta_hz']:>+10.2f}")
 
+    # The condition-comparison figure is the one that makes the causal claim readable,
+    # so it is produced unconditionally unless plots were switched off.
+    comparison_plot = None
+    if not args.no_plots:
+        try:
+            from ..runtime.runner import plot_condition_comparison
+
+            top = [d["population"] for d in deltas[:12]]
+            comparison_plot = plot_condition_comparison(
+                {k: v for k, v in cond_rates.items()}, out_dir / "input_vs_downstream.png",
+                populations=top,
+            )
+            if comparison_plot:
+                print(f"\ncomparison figure: {comparison_plot}")
+        except Exception as exc:
+            print(f"(comparison figure skipped: {type(exc).__name__}: {exc})")
+
     write_report(out_dir, "silencing_test", {
         "experiment": "silencing_test",
         "design": {
@@ -230,6 +247,7 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
         "structural_route_B_to_changed": route,
         "checks": checks,
         "passed": ok,
+        "comparison_figure": str(comparison_plot) if comparison_plot else None,
         "summaries": {"baseline": baseline, "silenced": silenced},
     })
     print(f"\nreport: {out_dir / 'silencing_test.json'}")
