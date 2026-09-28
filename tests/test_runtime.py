@@ -295,18 +295,44 @@ def test_recorder_spike_rows_match_the_network_spike_count():
 
 
 def test_recorder_honours_the_spike_neuron_filter():
+    """The filter must exclude other neurons *without* hiding the network's activity.
+
+    The earlier version of this test guarded its assertion with ``if df is not None``,
+    so a filter that recorded nothing at all would pass silently. It now first proves
+    the unfiltered network does produce spikes, so the filter is the only thing that
+    can explain the result.
+    """
     conn = make_synthetic_connectome([(0, 1, 200), (1, 2, 200)], 3)
+    stim = Stimulus([int(conn.flywire_ids[0])], rate_hz=200.0)
+
+    # control: with no filter, all three neurons are recorded
+    control_net = LIFNetwork(conn, LIFParams(), dt_ms=0.1, backend=NumpyBackend(), seed=0)
+    control_net.apply_stimulus(stim)
+    control = Recorder(conn, RecordingConfig(record_spikes=True, record_population=False), dt_ms=0.1)
+    control.begin(control_net)
+    for k in range(3000):
+        control.on_step(k, control_net.step(), control_net)
+    control_df = control.spikes_frame()
+    assert control_df is not None and len(control_df) > 0, "control run produced no spikes"
+    control_ids = set(int(x) for x in control_df["flywire_id"].unique())
+    assert control_ids == {int(x) for x in conn.flywire_ids}, (
+        f"unfiltered recording must include every spiking neuron, got {control_ids}"
+    )
+
+    # filtered: only the requested neuron may appear
+    target = int(conn.flywire_ids[2])
     net = LIFNetwork(conn, LIFParams(), dt_ms=0.1, backend=NumpyBackend(), seed=0)
-    net.apply_stimulus(Stimulus([int(conn.flywire_ids[0])], rate_hz=200.0))
+    net.apply_stimulus(stim)
     rec = Recorder(conn, RecordingConfig(
-        record_spikes=True, record_population=False,
-        spike_neuron_ids=(int(conn.flywire_ids[2]),)), dt_ms=0.1)
+        record_spikes=True, record_population=False, spike_neuron_ids=(target,)), dt_ms=0.1)
     rec.begin(net)
     for k in range(3000):
         rec.on_step(k, net.step(), net)
     df = rec.spikes_frame()
-    if df is not None:
-        assert set(df["flywire_id"].unique().tolist()) <= {int(conn.flywire_ids[2])}
+    assert df is not None, "the filtered channel recorded nothing at all"
+    assert len(df) > 0, "the target neuron spiked in the control run, so it must be recorded"
+    assert set(int(x) for x in df["flywire_id"].unique()) == {target}
+    assert float(np.asarray(net.spike_count)[2]) == pytest.approx(len(df))
 
 
 def test_recorder_truncation_is_flagged_not_silent():

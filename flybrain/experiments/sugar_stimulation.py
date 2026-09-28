@@ -32,6 +32,7 @@ from typing import Any, Dict, List, Optional, Sequence
 
 
 from ..analysis import connectivity_between, downstream_responders
+from ..analysis.firing_rates import rate_table_from_spikes
 from ..model.populations import PopulationRegistry
 from ..model.stimulus import Stimulus
 from ..runtime import RecordingConfig, detect_hardware, get_backend, plan_run
@@ -121,9 +122,18 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
     ) if pop_df is not None else []
 
     top = s.get("top_active_neurons", [])
-    mn9_rates = {
-        "mn9_left": float(s["population_rates_hz"].get("mn9", 0.0)),
-    }
+    # Per-neuron MN9 rates. The published reference reports the LEFT neuron
+    # specifically, so the comparison must be neuron-to-neuron. Comparing the
+    # two-neuron population mean against the published single-neuron value would be a
+    # like-for-unlike comparison and would overstate the agreement.
+    mn9_by_id = (
+        rate_table_from_spikes(spikes_df, [MN9_LEFT, MN9_RIGHT], cfg.duration_ms, cfg.trials)
+        if spikes_df is not None
+        else {}
+    )
+    mn9_left = mn9_by_id.get(MN9_LEFT, {}).get("mean_rate_hz")
+    mn9_right = mn9_by_id.get(MN9_RIGHT, {}).get("mean_rate_hz")
+    mn9_pop_mean = s["population_rates_hz"].get("mn9")
     mn9_present = [i for i in (MN9_LEFT, MN9_RIGHT) if i in set(int(x) for x in conn.flywire_ids)]
 
     # is there a monosynaptic route from the sugar GRNs into the responding set?
@@ -159,10 +169,15 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
         or "none above 1 Hz",
     ))
     checks.append(check(
-        bool(mn9_rates["mn9_left"] >= 0.0),
-        "MN9 readout was measured",
-        f"MN9 left = {mn9_rates['mn9_left']:.2f} Hz "
-        f"({len(mn9_present)} of 2 MN9 neurons present in the loaded connectome)",
+        mn9_left is not None,
+        "MN9 left readout was measured from the recorded spikes",
+        (f"MN9 left ({MN9_LEFT}) = {mn9_left:.2f} Hz; "
+         f"MN9 right ({MN9_RIGHT}) = {mn9_right:.2f} Hz; "
+         f"two-neuron population mean = {mn9_pop_mean:.2f} Hz. "
+         f"({len(mn9_present)} of 2 MN9 neurons present)")
+        if mn9_left is not None
+        else f"MN9 left ({MN9_LEFT}) did not fire in this run "
+             f"({len(mn9_present)} of 2 MN9 neurons present in the loaded connectome)",
     ))
     if route is not None:
         checks.append(check(
@@ -194,21 +209,24 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
             print(f"  file           {reference['file']}")
             print(f"  trials         {reference['trials']}")
             print(f"  sugar GRN rate {reference['median_sugar_grn_rate_hz']:.1f} Hz (median)")
-            print(f"  MN9 left       {reference['mn9_left_rate_hz']:.2f} Hz")
-            print(f"  MN9 right      {reference['mn9_right_rate_hz']:.2f} Hz")
+            print(f"  MN9 left       {reference['mn9_left_rate_hz']:.2f} Hz  (single neuron)")
+            print(f"  MN9 right      {reference['mn9_right_rate_hz']:.2f} Hz  (single neuron)")
             print(f"  active neurons {reference['active_neurons']}")
             print()
             print("FlyBrain, this run:")
             print(f"  trials         {s['trials']}")
             print(f"  sugar GRN rate {sugar_rate_measured:.1f} Hz")
-            print(f"  MN9 left       {mn9_rates['mn9_left']:.2f} Hz")
+            if mn9_left is not None:
+                print(f"  MN9 left       {mn9_left:.2f} Hz  (same single neuron)")
             print(f"  active neurons {s['active_neurons_any_spike']}")
             print()
-            print("Agreement is NOT claimed: the upstream model is Brian 2 with exact linear")
-            print("integration and 30 trials, while the chaobrain port orders the sub-steps")
-            print("differently (docs/UPSTREAM_AUDIT.md sec. 4.1). Compare the qualitative")
-            print("pattern - sparse downstream activation driven by the sensory population -")
-            print("not the numbers.")
+            print("The comparison is neuron-to-neuron: the published figure is for the LEFT")
+            print(f"MN9 neuron alone ({MN9_LEFT}), and so is the FlyBrain figure above.")
+            print("Compare the qualitative pattern - sparse downstream activation driven by")
+            print("the sensory population, with MN9 among the driven - not the numbers:")
+            print("different RNG, 1 trial here versus a 30-trial mean upstream, and a")
+            print("different sub-step ordering in the chaobrain port")
+            print("(docs/UPSTREAM_AUDIT.md sec. 4.1).")
         else:
             print("no published reference found under third_party/; skipping comparison")
 
@@ -221,15 +239,35 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
             "downstream populations, including the MN9 motor neurons."
         ),
         "stimulus": stim.to_dict(),
-        "dataset": {"dataset_id": conn.dataset_id, "n_neurons": conn.n_neurons,
-                    "n_edges": conn.n_edges, "is_subset": conn.is_subset},
+        # Describes the *working set this run simulated*, taken from the run summary.
+        # An earlier version described the parent dataset instead, so a subset run
+        # reported `is_subset: False` and `n_neurons: 127400` - exactly the confusion
+        # between subset and whole-brain that the project is meant to prevent.
+        "run_scope": {
+            "effective_mode": s["effective_mode"],
+            "is_subset": s["is_subset"],
+            "n_neurons": s["n_neurons"],
+            "n_edges": s["n_edges"],
+            "subset_info": s.get("subset_info"),
+        },
+        "parent_dataset": {
+            "dataset_id": conn.dataset_id,
+            "n_neurons": conn.n_neurons,
+            "n_edges": conn.n_edges,
+        },
         "measured": {
             "sugar_grn_rate_hz": sugar_rate_measured,
             "total_spikes": s["total_spikes"],
             "active_neurons": s["active_neurons_any_spike"],
             "mean_rate_active_hz": s["mean_rate_hz_active_neurons"],
             "max_rate_hz": s["max_rate_hz"],
-            "mn9_rates_hz": mn9_rates,
+            "mn9_rates_hz": {
+                # per-neuron, so the comparison against the published single-neuron
+                # figure is like-for-like; the population mean is reported separately
+                f"mn9_left_{MN9_LEFT}": mn9_left,
+                f"mn9_right_{MN9_RIGHT}": mn9_right,
+                "mn9_population_mean": mn9_pop_mean,
+            },
             "top_active_neurons": top[:25],
             "top_active_populations": s["top_active_populations"][:25],
             "downstream_responders": [
@@ -238,6 +276,12 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
             ],
             "monosynaptic_route_from_sugar_grn_to_responders": route,
         },
+        "comparison_basis": (
+            "MN9 figures are per-neuron: mn9_left_<id> and mn9_right_<id> are the two "
+            "individual motor neurons, matching the published per-neuron reference. "
+            "mn9_population_mean is the mean over whichever MN9 neurons are present and "
+            "must not be compared against the published single-neuron value."
+        ),
         "published_reference": reference,
         "checks": checks,
         "passed": ok,

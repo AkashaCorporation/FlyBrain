@@ -12,13 +12,20 @@ a mind.
 ```
 Stimulate the 21 labelled sugar-sensing gustatory receptor neurons at 100 Hz for 1 s
         ↓
-253 neurons fire in an 8 000-neuron working set; 21 are the ones we drove
+376 of 127,400 neurons fire (mean 1.3 active per step)
         ↓
-MN9 motor neurons fire at 97.5 Hz, and 211 monosynaptic edges run from the sugar GRNs
-to the neurons that responded
+MN9 motor neurons are among the driven: 81.0 Hz left, 51.0 Hz right
+        ↓
+177 monosynaptic edges run from the sugar GRNs to the responders
         ↓
 Every number traceable to a dataset SHA-256, a git revision, and a seed
 ```
+
+The published reference (the authors' own output, 30 trials) gives 404 active neurons
+and 67.0 / 48.6 Hz for MN9. FlyBrain's single-trial whole-brain run agrees to within
+7 % on the active-neuron count and on MN9-right, and is 21 % high on MN9-left. That is
+**partial** agreement, not a reproduction, and
+[`docs/STATUS.md`](docs/STATUS.md) says so in detail rather than rounding it up.
 
 ---
 
@@ -141,14 +148,15 @@ All 127 400 neurons and all 14 687 178 edges, measured on the development machin
 
 | | value |
 |---|---|
-| measured step cost | **196 ms/step** |
-| throughput | 5.1 steps/s |
-| 1000 ms of simulated time | **32.7 min** |
+| measured step cost | **200.6 ms/step** |
+| throughput | 4.98 steps/s |
+| 1000 ms of simulated time | **33.4 min** |
 | estimated peak memory | **0.366 GB** |
 | a dense connectivity matrix would need | **64.9 GB** |
 
-It runs; it is not fast. See [`docs/STATUS.md`](docs/STATUS.md) for the full
-measurement and for the identified bottleneck.
+It runs; it is not fast. Two whole-brain runs under different commits produced an
+**identical spike digest**, and [`docs/STATUS.md`](docs/STATUS.md) has the full
+measurement, the reproducibility check, and the identified bottleneck.
 
 ```bash
 flybrain run --mode whole-brain --duration-ms 1000 --stimulus sugar_grn --max-minutes 120
@@ -156,18 +164,25 @@ flybrain run --mode whole-brain --duration-ms 1000 --stimulus sugar_grn --max-mi
 
 **If whole-brain cannot run safely, FlyBrain refuses rather than quietly shrinking.**
 It estimates the memory requirement by component, compares it against 60 % of
-*available* (not total) RAM, prints the estimate, exits with code **3**, and simulates
-nothing — not even a run directory:
+*available* (not total) RAM, and — for the runtime gate — against a per-step cost it
+measures by actually stepping the assembled network. It then prints the estimate,
+exits with code **3**, and simulates nothing. It does not even create the run
+directory, so nothing on disk can be mistaken for a result:
 
 ```
 $ flybrain run --mode whole-brain --duration-ms 60000 --max-minutes 1
 REFUSED: estimated runtime 2548.4 min exceeds the configured limit of 1.0 min
-         (254.8 ms/step measured, 600000 steps x 1 trial)
+         (254.8 ms/step measured, 600000 steps x 1 trial(s))
 ```
 
 Pass `--allow-fallback` to get a subset instead — every artefact then records
 `requested_mode: whole-brain`, `effective_mode: subset`, `mode_changed: true`, and a
 note beginning "WHOLE-BRAIN RUN WAS REQUESTED AND WAS NOT DELIVERED."
+
+`--allow-fallback` covers *memory* infeasibility only. It deliberately does **not**
+override `--max-minutes`, because a user who set a time limit has stated a constraint,
+and silently running a different experiment instead is the failure mode this project
+exists to avoid.
 
 ---
 
@@ -186,9 +201,12 @@ outputs/runs/<run-id>/
 └── plots/             population rates, raster, top populations
 ```
 
-Spike tables are **not** recorded by default: a whole-brain spike dump is unbounded
-output. The default is population rates. When recording is capped, the summary says so
-rather than silently truncating.
+Spike tables are **not** recorded by default on the command line: a whole-brain spike
+dump is unbounded output, so `flybrain run` records population rates unless
+`--record spikes` is passed. Through the Python API, `RecordingConfig.record_spikes`
+defaults to `True` and is bounded by `max_spike_rows` (20 M rows); pass
+`record_spikes=False` for rates only. When a cap is hit, the recorder stops and sets
+`spike_recording_truncated` in `summary.json` rather than silently truncating.
 
 ---
 
@@ -198,11 +216,13 @@ rather than silently truncating.
 |---|---|
 | `flybrain experiments smoke_test` | initialises, stimulates, propagates, is deterministic — on a synthetic graph, so it needs no dataset |
 | `flybrain experiments baseline_activity` | with no stimulus the model is exactly quiescent, so later activity is attributable to the declared stimulus |
-| `flybrain experiments sugar_stimulation` | the known sensory population drives propagation into non-sensory downstream populations |
+| `flybrain experiments sugar_stimulation` | the known sensory population drives propagation into non-sensory downstream populations, with per-neuron MN9 rates comparable to the published reference |
 | `flybrain experiments silencing_test` | stimulate A, silence B, and measure the change in C against an un-silenced baseline |
 
 Each writes a JSON report containing its hypothesis, its measured numbers, and each
-check with the evidence behind it.
+check with the evidence behind it. Each run inside an experiment also writes its own
+`config.json`, `environment.json`, `dataset.json`, `summary.json`, spike and
+population tables, `run.log`, and a `plots/` directory.
 
 ---
 

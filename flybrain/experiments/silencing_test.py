@@ -24,6 +24,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Sequence
 
 import numpy as np
+import pandas as pd
 
 from ..analysis import connectivity_between
 from ..model.populations import PopulationRegistry
@@ -173,11 +174,31 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
             route = connectivity_between(conn, [int(x) for x in b_ids], target_ids)
             route["targets_considered"] = [d["population"] for d in changed]
 
+    # Read the silenced condition's spike table so the intervention can be checked
+    # against what was actually recorded, rather than asserted in prose.
+    silenced_run_dir = out_dir / "run-silenced"
+    silenced_rows = None
+    silenced_own_spikes = None
+    try:
+        silenced_frame = pd.read_parquet(silenced_run_dir / "spikes.parquet")
+        silenced_rows = int(len(silenced_frame))
+        silenced_own_spikes = int(
+            silenced_frame["flywire_id"].isin({int(x) for x in b_ids}).sum()
+        )
+    except Exception:
+        pass
+
     checks: List[Dict[str, Any]] = [
         check(
             baseline["total_spikes"] > 0,
             "baseline condition produced activity",
             f"{baseline['total_spikes']} spikes",
+        ),
+        check(
+            silenced["silenced_flywire_ids"] == sorted({int(x) for x in b_ids}),
+            "the silencing intervention was applied and recorded",
+            f"run-silenced recorded silenced_flywire_ids = "
+            f"{silenced['silenced_flywire_ids']} for the requested B = {sorted(set(int(x) for x in b_ids))}",
         ),
         check(
             silenced["total_spikes"] != baseline["total_spikes"]
@@ -188,13 +209,17 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
                 f"({d['delta_hz']:+.1f})" for d in deltas[:4]
             ) or "no population changed",
         ),
-        check(
-            True,
-            "the silenced neuron itself is still counted (documented upstream semantics)",
-            "silencing removes outgoing influence only; the neuron keeps receiving input "
-            "and may keep spiking, so its own rate is not expected to drop to zero",
-        ),
     ]
+    if silenced_own_spikes is not None:
+        checks.append(check(
+            silenced_rows > 0,
+            "the silenced condition produced a non-empty spike table",
+            f"{silenced_rows} spike(s) recorded in the silenced condition, of which "
+            f"{silenced_own_spikes} came from the {len(b_ids)} silenced neuron(s). "
+            f"Silencing removes outgoing influence only, so a silenced neuron keeps "
+            f"receiving input and may keep spiking; zero from it would mean it received "
+            f"no input in this working set, not that silencing failed.",
+        ))
     if route is not None:
         checks.append(check(
             route["connections"] > 0,

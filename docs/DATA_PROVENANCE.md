@@ -39,21 +39,24 @@ dataset's identity before spending the disk to stage it.
 |---|---|
 | source | https://github.com/philshiu/Drosophila_brain_model |
 | release | FlyWire 2023_03_23 materialization, completeness threshold 630 |
-| neuron table | `2023_03_23_completeness_630_final.csv` — 3 132 846 bytes |
+| neuron table | `2023_03_23_completeness_630_final.csv` — 3 057 611 bytes |
 | neuron table SHA-256 | `e6b71e17671a9bdb05f55e4bc6774640a1418cb7a05125e0fc994ad40f9bfdfb` |
-| connectivity table | `2023_03_23_connectivity_630_final.parquet` — 90 835 774 bytes |
+| connectivity table | `2023_03_23_connectivity_630_final.parquet` — 86 630 944 bytes |
 | connectivity SHA-256 | `94db8c650533bc36ffa3223f2e62325d5648b8d6bd31c3a4e1c804628c7557b3` |
 | combined card digest | `67de1c152ff8d47b8460f1c980052abfe3ed40c6e98870ff8af073a9e12dcf4a` |
 | neurons | 127 400 |
 | directed edges | 14 687 178 |
 | chemical synapses | 52 793 639 |
 
+All byte counts are read from `data/metadata/flywire_630.json`, which is the record the
+staging step wrote after hashing the files — not transcribed by hand.
+
 Staged from `third_party/drosophila_whole_brain_snn_simulation`. The connectivity
 table is **byte-identical** to the copy vendored by
 `chaobrain/drosophila_whole_brain_snn_simulation`
 (`UPSTREAM_AUDIT.md` §4), so there is one source of truth for the connectivity. The
-neuron table has a different SHA-256 in the two repositories but identical content
-(127 400 rows, same index range, same values); the difference is line-ending
+neuron table has a different SHA-256 in the two repositories but identical *content*
+(127 400 rows, same index range, same values); the bytes differ because of line-ending
 encoding, which the audit verified rather than assumed.
 
 This is the version the Nature paper used, and the only version for which the authors'
@@ -64,14 +67,15 @@ comparison is possible.
 
 | field | value |
 |---|---|
-| neuron table | `Completeness_783.csv` — 3 473 121 bytes |
+| neuron table | `Completeness_783.csv` — 3 465 987 bytes |
 | neuron table SHA-256 | `52b0ac6094cd32c546f8d4c341e094376f48f4e791f8db9b166de5dff8199ea4` |
-| connectivity table | `Connectivity_783.parquet` — 105 721 088 bytes |
+| connectivity table | `Connectivity_783.parquet` — 100 804 642 bytes |
 | connectivity SHA-256 | `efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347` |
 | combined card digest | `4a621918d7ee52a7e915e98f83814356115c0fcf04392ac32d285893521e1097` |
 | neurons | 138 639 |
 | directed edges | 15 091 983 |
-| chemical synapses | measured by the validator; see `outputs/dataset_reports_all.json` |
+| chemical synapses | 54 492 922 |
+| excitatory / inhibitory presynaptic neurons | 96 672 / 41 333 (634 with no outgoing edge) |
 
 **No importer had to be written for this.** The upstream repository ships it
 alongside v630, so FlyBrain's data strategy reduces to "stage the two files, verify
@@ -104,7 +108,10 @@ Full machine-readable report: [`outputs/dataset_report.json`](../outputs/dataset
 | invalid edges (out-of-range endpoint, NaN, or zero magnitude) | **0** |
 | NaN or non-positive `Connectivity` values | **0** |
 | `Excitatory` distinct values | exactly `{−1, +1}` |
-| max out-degree / in-degree | 2 358 / 2 122 |
+| max out-degree / in-degree | 9 615 / 10 196 |
+| mean out-degree | 115.28 |
+| signed synapse count range | −2 358 … +1 801 |
+| CSR bytes | ~119.5 MB |
 
 Two facts from this table shape the whole design:
 
@@ -146,7 +153,9 @@ type annotation says so.
 
 The report distinguishes `fail` (the dataset violates an invariant that makes
 simulation meaningless — abort) from `warn` (a true property the operator must know
-about — proceed, but record it). Six warnings on `flywire_630`, zero failures.
+about — proceed, but record it). On `flywire_630`: **3 warnings, 0 failures**. The
+three warnings are `orphan_counts`, `sign_coverage` and `neuron_types_available` —
+each one a true property of the data, not a defect in the loading.
 
 ### The ID ↔ index check (verification path only)
 
@@ -162,13 +171,25 @@ This is the check that makes "neuron IDs are preserved" a verified statement rat
 than an assertion, and it is the reason the full seven-column read still exists in the
 codebase.
 
-It runs only on the verification path, because reading all seven columns costs
-**~2.4 GB of peak RSS** on the cold path: `read_parquet` materialises each column as
-int64 before anything is narrowed, and four of those columns
-(`Presynaptic_ID`, `Postsynaptic_ID`, `Connectivity`, `Excitatory`) are not consumed
-by the simulation at all. Narrowing the load path to the three columns the simulation
-uses cut the measured RSS delta from **2 428 MB to 1 356 MB (−44 %)**, so the
-expensive read is now paid deliberately once, instead of on every run.
+It runs only on the verification path, because reading all seven columns is expensive.
+`scripts/measure_load_memory.py` measures the same decode step both ways in one
+process, back to back, and is reproducible:
+
+```
+all 7 columns      : RSS delta    2318.0 MB (peak 2318.0 MB)
+3 required columns : RSS delta     501.2 MB (peak  280.9 MB)
+
+reduction: 78.4% less RSS on the decode step
+reduction: 87.9% less peak resident memory
+```
+
+Raw output: `outputs/load_memory_flywire_630.json`. So the expensive read is now paid
+deliberately once on the verification path, instead of on every run.
+
+(That script also prints a `build_connectome` line whose RSS delta is negative: it is
+measured immediately after the previous arrays were released, so the delta reflects
+the release as much as the allocation. The two decode figures above are the meaningful
+pair — same operation, same process, different column count.)
 
 ---
 
