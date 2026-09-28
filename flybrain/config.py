@@ -15,7 +15,23 @@ from typing import Any, Dict, List, Optional
 # Paths
 # --------------------------------------------------------------------------------------
 
-PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent
+#: Where the package itself lives. For a source checkout this is the repository root;
+#: for a wheel install it is ``site-packages``.
+PACKAGE_ROOT: Path = Path(__file__).resolve().parent.parent
+
+#: Where run artefacts and staged data belong.
+#:
+#: For a source checkout that is the repository root. For an installed package it must
+#: NOT be ``site-packages`` - writing ``outputs/`` into the environment's package
+#: directory is surprising and often not permitted - so it falls back to the current
+#: working directory, which is what a user running ``flybrain`` from their project
+#: expects.
+_SOURCE_CHECKOUT: bool = (PACKAGE_ROOT / "pyproject.toml").is_file() and (
+    PACKAGE_ROOT / "flybrain"
+).is_dir()
+
+PROJECT_ROOT: Path = PACKAGE_ROOT if _SOURCE_CHECKOUT else Path.cwd()
+
 THIRD_PARTY_DIR: Path = PROJECT_ROOT / "third_party"
 DATA_DIR: Path = PROJECT_ROOT / "data"
 RAW_DIR: Path = DATA_DIR / "raw"
@@ -23,10 +39,12 @@ PROCESSED_DIR: Path = DATA_DIR / "processed"
 METADATA_DIR: Path = DATA_DIR / "metadata"
 OUTPUTS_DIR: Path = PROJECT_ROOT / "outputs"
 RUNS_DIR: Path = OUTPUTS_DIR / "runs"
-DOCS_DIR: Path = PROJECT_ROOT / "docs"
+#: Documentation always lives next to the source, not next to the data.
+DOCS_DIR: Path = PACKAGE_ROOT / "docs"
 
 #: Environment overrides. `FLYBRAIN_DATA_DIR` exists so that a dataset staged on a
-#: different volume can be used without editing code or copying 180 MB around.
+#: different volume can be used without editing code or copying 180 MB around; it is
+#: the supported way to point an installed package at an externally staged dataset.
 if os.environ.get("FLYBRAIN_DATA_DIR"):
     DATA_DIR = Path(os.environ["FLYBRAIN_DATA_DIR"]).expanduser().resolve()
     RAW_DIR = DATA_DIR / "raw"

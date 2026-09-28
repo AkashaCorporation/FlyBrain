@@ -43,6 +43,13 @@ flybrain = "flybrain.cli:main"
 [tool.setuptools.packages.find]
 include = ["flybrain*"]
 
+[tool.setuptools.package-data]
+# populations.json is the curated neuron-population registry. Without this it is
+# present in an editable install (which reads the source tree) but missing from a
+# real install, and the population registry would fail to load. That asymmetry is
+# exactly the kind of packaging bug that only shows up after publishing.
+flybrain = ["model/populations.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
