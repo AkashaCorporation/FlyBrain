@@ -25,6 +25,7 @@ from . import __version__, config as fb_config
 from .config import RunConfig
 from .data import (
     DATASET_SOURCES,
+    check_id_index_consistency,
     load_connectome,
     load_dataset_card,
     list_dataset_cards,
@@ -75,6 +76,22 @@ def _load_connectome(dataset_id: str, *, quiet: bool = False):
     return load_connectome(
         dataset_id, fb_config.RAW_DIR, fb_config.PROCESSED_DIR, fb_config.METADATA_DIR
     )
+
+
+def _load_connectome_deep(dataset_id: str):
+    """Load a dataset reading *every* column, for verification only.
+
+    Attaches the raw columns to the returned object so the ID<->index check can run
+    without re-reading the parquet. Memory cost is deliberately paid only here.
+    """
+    from .data.loader import build_connectome, raw_paths
+
+    neuron_p, conn_p = raw_paths(dataset_id, fb_config.RAW_DIR)
+    conn = build_connectome(dataset_id, neuron_p, conn_p, deep_columns=True)
+    from .data.loader import read_connectivity_table
+
+    conn.raw_columns = read_connectivity_table(conn_p, deep=True)  # type: ignore[attr-defined]
+    return conn
 
 
 def parse_stimulus_spec(spec: str, registry: PopulationRegistry) -> Stimulus:
@@ -302,10 +319,28 @@ def cmd_datasets(args) -> int:
             print(f"  file          {f.name}  {f.size_bytes / 1e6:.2f} MB  present={present}")
         if args.verify:
             print("  verifying content ...")
-            conn = load_connectome(
-                card.dataset_id, fb_config.RAW_DIR, fb_config.PROCESSED_DIR, fb_config.METADATA_DIR
-            )
+            # The verification path reads every column and checks the ID<->index
+            # mapping. That is the expensive, thorough check; the load path stays lean.
+            conn = _load_connectome_deep(card.dataset_id)
             rep = validate_connectome(conn)
+            idcheck = check_id_index_consistency(conn, conn.raw_columns)
+            rep.add(idcheck.name, idcheck.status, idcheck.detail, idcheck.value)
+            update_dataset_card(
+                card.dataset_id, fb_config.METADATA_DIR,
+                neuron_count=conn.n_neurons,
+                edge_count=conn.n_edges,
+                extra={
+                    "synapses_total": conn.synapse_count,
+                    "excitatory_neurons": rep.statistics.get("excitatory_neurons"),
+                    "inhibitory_neurons": rep.statistics.get("inhibitory_neurons"),
+                    "neurons_unknown_sign": rep.statistics.get("neurons_unknown_sign"),
+                    "validation_failures": len(rep.failures),
+                    "validation_warnings": len(rep.warnings),
+                    "id_index_consistency": idcheck.status,
+                },
+            )
+            d = rep.to_dict()
+            print(f"    ID<->index consistency: [{idcheck.status}] {idcheck.detail}")
             update_dataset_card(
                 card.dataset_id, fb_config.METADATA_DIR,
                 neuron_count=conn.n_neurons,
@@ -330,12 +365,15 @@ def cmd_datasets(args) -> int:
         print()
 
     if args.report:
-        conn = _load_connectome(args.report)
+        conn = _load_connectome_deep(args.report)
         rep = validate_connectome(conn)
+        idcheck = check_id_index_consistency(conn, conn.raw_columns)
+        rep.add(idcheck.name, idcheck.status, idcheck.detail, idcheck.value)
         out = fb_config.OUTPUTS_DIR / "dataset_report.json"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(rep.to_dict(), indent=2) + "\n", encoding="utf-8")
         print(f"wrote {out}")
+        print(f"ID<->index consistency: [{idcheck.status}] {idcheck.detail}")
         update_dataset_card(
             args.report, fb_config.METADATA_DIR,
             neuron_count=conn.n_neurons,
@@ -347,6 +385,7 @@ def cmd_datasets(args) -> int:
                 "neurons_unknown_sign": rep.statistics.get("neurons_unknown_sign"),
                 "validation_failures": len(rep.failures),
                 "validation_warnings": len(rep.warnings),
+                "id_index_consistency": idcheck.status,
             },
         )
         rep.raise_if_failed()

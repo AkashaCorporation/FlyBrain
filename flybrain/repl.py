@@ -52,6 +52,20 @@ Commands
 """
 
 
+def tokenize(line: str) -> List[str]:
+    """Split a command line, preserving backslashes.
+
+    POSIX-mode ``shlex.split`` treats ``\\`` as an escape character, which silently
+    destroys Windows paths - ``save C:\\Users\\me`` would become ``C:Usersme``. The
+    non-POSIX lexer keeps backslashes intact; quotes are stripped afterwards so that
+    arguments containing spaces still work.
+    """
+    lex = shlex.shlex(line, posix=False)
+    lex.whitespace_split = True
+    lex.commenters = ""
+    return [tok.strip('"').strip("'") for tok in lex]
+
+
 class Console:
     """Stateful command processor over one :class:`LIFNetwork`."""
 
@@ -118,6 +132,7 @@ class Console:
         )
         self.steps_run = 0
         self.total_seconds = 0.0
+        self._should_quit = False
 
     def _default_seed_ids(self) -> List[int]:
         """Working-set seeds for a fresh console: the sugar circuit plus the readout."""
@@ -196,12 +211,17 @@ class Console:
         if not line:
             return True
         try:
-            parts = shlex.split(line)
+            parts = tokenize(line)
         except ValueError as exc:
             self.echo(f"could not parse command: {exc}")
             return True
+        if not parts:
+            return True
         cmd, rest = parts[0].lower(), parts[1:]
-        handler = getattr(self, f"cmd_{cmd}", None)
+        # Command names are hyphenated (`top-active`) but method names cannot be, so
+        # the lookup normalises hyphens to underscores. Without this, every hyphenated
+        # command silently reported itself as unknown.
+        handler = getattr(self, f"cmd_{cmd.replace('-', '_')}", None)
         if handler is None:
             self.echo(f"unknown command {cmd!r}. Type `help`.")
             return True
@@ -211,14 +231,17 @@ class Console:
             self.echo(f"error: {exc}")
         except KeyboardInterrupt:
             self.echo("interrupted")
-        return True
+        return not self._should_quit
 
     # -- commands ------------------------------------------------------------------
     def cmd_help(self, rest: List[str]) -> None:
         self.echo(HELP.strip())
 
     def cmd_quit(self, rest: List[str]) -> None:
-        raise SystemExit(0)
+        # Set a flag rather than raising SystemExit: the session loop must return its
+        # exit code normally, and a library function that escapes via SystemExit
+        # cannot be driven from a script or a test.
+        self._should_quit = True
 
     cmd_exit = cmd_quit
 

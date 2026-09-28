@@ -24,6 +24,7 @@ from .common import (
     base_parser,
     build_run_config,
     check,
+    default_seed_ids,
     execute,
     experiment_dir,
     load_dataset,
@@ -54,7 +55,13 @@ def run(argv: Optional[Sequence[str]] = None) -> int:
     checks: List[Dict[str, Any]] = []
 
     def measure(name: str, *, disable_recurrence: bool) -> Dict[str, Any]:
-        c = build_run_config(args, disable_recurrence=disable_recurrence)
+        overrides: Dict[str, Any] = {"disable_recurrence": disable_recurrence}
+        if args.mode == "subset" and not (args.subset_seed or []):
+            # "no stimulus" still has to name a network. Seeding from the sugar
+            # circuit and the MN9 readout makes this condition comparable to the
+            # stimulation experiments: same working set, only the stimulus differs.
+            overrides["subset_seed_ids"] = default_seed_ids(conn, registry)
+        c = build_run_config(args, **overrides)
         plan = plan_run(conn, c, [], hardware=hw)
         print(f"--- condition {name!r}: {plan.label()}")
         for note in plan.notes:

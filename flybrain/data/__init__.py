@@ -27,7 +27,7 @@ from .provenance import (
     utc_now_iso,
     write_dataset_card,
 )
-from .validate import DatasetReport, validate_connectome
+from .validate import DatasetReport, check_id_index_consistency, validate_connectome
 
 __all__ = [
     "DATASET_SOURCES",
@@ -53,4 +53,5 @@ __all__ = [
     "write_dataset_card",
     "DatasetReport",
     "validate_connectome",
+    "check_id_index_consistency",
 ]

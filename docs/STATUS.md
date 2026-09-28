@@ -15,7 +15,7 @@ artefact or command that produced the evidence.
 |---|---|---|---|
 | 1 | project installs from scratch | **DONE** | `pip install -e .` into a clean venv on Python 3.11.7; `flybrain --version` → `FlyBrain 0.0.1`. Only NumPy/pandas/pyarrow are hard requirements. |
 | 2 | FlyWire-derived connectome data loads | **DONE** | `flybrain datasets --stage all` stages and validates both versions. `outputs/dataset_report.json`. Load path: parquet → int32/int16 arrays, 14 687 178 edges; 0.55 s from the processed cache, 1.5 s cold. |
-| 3 | neuron IDs are preserved | **DONE** | `Connectome.flywire_ids` is the neuron table index verbatim; `tests/test_data.py::test_real_dataset_matches_the_audited_numbers`. Subsetting preserves IDs: `test_real_dataset_subset_of_the_sugar_grns` asserts all 21 sugar GRNs survive. Orphan neurons are *kept* in the index space (385 with no outgoing edge) so IDs stay stable — `test_real_dataset_orphans_are_kept_in_the_index_space`. |
+| 3 | neuron IDs are preserved | **DONE** | `Connectome.flywire_ids` is the neuron table index verbatim. Proven directly: `flybrain datasets --report flywire_630` checks every edge's `Presynaptic_ID`/`Postsynaptic_ID` against `flywire_ids[index]` and reports **29 374 356 endpoints checked, 0 mismatches**. Subsetting preserves IDs (`test_real_dataset_subset_of_the_sugar_grns`), and orphan neurons are *kept* in the index space (385 with no outgoing edge) so IDs stay stable (`test_real_dataset_orphans_are_kept_in_the_index_space`). |
 | 4 | synaptic connectivity is represented correctly | **DONE** | CSR `indptr`/`indices` verified against a manual count (`test_csr_indptr_consistent_with_out_degree`); signed counts verified present in both directions; duplicate edge pairs = 0; self-loops = 0. Never densified — a dense matrix would need **64.9 GB** (`estimate_requirements`). |
 | 5 | excitatory/inhibitory behaviour supported where data permits | **DONE** | Sign read from the dataset's `Excitatory` column. 86 543 excitatory / 40 472 inhibitory presynaptic neurons / 385 unknown (no outgoing edge). Verified that no neuron is mixed (`sign_is_per_neuron` check, `neurons_with_mixed_sign = 0`). Excitatory and inhibitory conductance changes asserted separately in `test_runtime.py`; an inhibitory volley is shown to be able to hold a neuron below threshold. |
 | 6 | LIF network executes | **DONE** | `flybrain/model/lif.py` implements the exact linear solution. Verified against its closed form and its fixed point, and against explicit Euler in the small-`dt` limit (`tests/test_model_lif.py`). |
@@ -38,7 +38,7 @@ artefact or command that produced the evidence.
 |---|---|---|---|
 | 17 | whole-brain mode runs if hardware permits | **DONE** | Run completed on the full 127 400-neuron / 14 687 178-edge network: **204.2 ms/step measured, 10 000 steps**. See "Whole-brain result" below. The feasibility gate passed against 3.66 GB available RAM; estimated peak requirement **0.36 GB**. |
 | 18 | JAX GPU acceleration | **PARTIAL — environment-limited, not implemented-away** | A `jax` backend exists and is selectable (`--backend jax`), and produces **bit-identical** spike counts to NumPy. But **JAX cannot use a GPU on this machine**: `jax.default_backend()` → `'cpu'`, `jax.devices()` → `[CpuDevice(id=0)]`, because CUDA-enabled `jaxlib` wheels are published for Linux only. The GTX 1650 is present and reported, and reported as *unusable by this process*. `requirements/gpu.txt` documents the WSL2 route. NumPy is also measurably faster here (1.78 vs 3.15 ms/step), so `auto` selects NumPy. |
-| 19 | reproduce at least one qualitative result from the published model | **DONE (qualitative, and explicitly not quantitative)** | Sugar GRN stimulation drives sparse downstream activation and MN9, matching the published pattern. Published reference (measured from the authors' own `sugarR_100Hz.parquet`, 30 trials): MN9-L 67.03 Hz, 404 active neurons. FlyBrain, 8 000-neuron subset, 1 trial: MN9-L 97.50 Hz, 253 active neurons. Same order, same sparsity, **numbers not claimed to match** — see "Honest limits" below. |
+| 19 | reproduce at least one qualitative result from the published model | **DONE (qualitative; near-quantitative on one readout, and explicitly not claimed as a reproduction)** | Whole-brain sugar protocol: MN9-left **66.00 Hz vs the published 67.03 Hz (1.5 % apart)**, active neurons 376 vs 404 (7 %). See "Comparison against the authors' published output" below for why this is still not a quantitative reproduction claim. |
 
 ---
 
@@ -61,10 +61,12 @@ artefact or command that produced the evidence.
 
 ```
 $ pytest -q
+145 passed
 ```
 
-All tests pass. The suite is organised so that the physics is checked against
-*independent* expectations rather than against the implementation's own output:
+All 145 tests pass, and `ruff check --select F,E9` is clean. The suite is organised so
+that the physics is checked against *independent* expectations rather than against the
+implementation's own output:
 
 * the integrator against its exact closed-form solution and its fixed point
   (`test_integrator_matches_closed_form_impulse_response`,
@@ -95,30 +97,113 @@ flybrain experiments sugar_stimulation --mode whole-brain --duration-ms 1000 \
     --rate-hz 100 --max-minutes 120 --compare-published
 ```
 
-* network: 127 400 neurons, 14 687 178 edges, `subset=False`
-* feasibility: passed against 3.66 GB available RAM; estimated peak requirement
-  **0.36 GB** (largest component: the per-step transient over 14.7 M edges)
-* measured step cost: **204.2 ms/step** → ~34 minutes per simulated second at
-  `dt = 0.1 ms`
-* peak resident memory observed: **~0.7 GB** (the estimate is conservative)
-* this satisfies the objective's "whole-brain mode runs if available hardware permits"
-  without any fallback
+Measured on 2026-09-28 (Windows 11, i7-7700K, 16 GB RAM, no usable GPU):
 
-The measured 204 ms/step is higher than the bare-array benchmark of 126 ms/step
-because the real run also performs the stimulus draws, the delay ring update, the
-spike counter, and recording. Profiling is in `outputs/profile_*.json`.
+| | value |
+|---|---|
+| network | 127 400 neurons, 14 687 178 edges, `subset=False` |
+| feasibility | passed against 3.66 GB available RAM; estimated peak **0.366 GB** |
+| measured step cost | **196.4 ms/step** (probe 204.2) |
+| throughput | 5.09 steps/s |
+| wall time | **1963.6 s = 32.7 min** for 1000 ms of simulated time |
+| total spikes | 12 979 |
+| active neurons | 376 |
+| mean active neurons per step | **1.30** (max 10) |
+| spike digest | `d28feb6b82d1108056718dd246480cf4061c2c83bc14241779213941541f3760` |
+| recording | not truncated; no population had missing members |
+
+The feasibility estimate was **0.366 GB peak against a 64.92 GB dense matrix** — a
+factor of 177, which is why the sparse edge-list representation is a requirement
+rather than an optimisation.
+
+This satisfies the objective's "whole-brain mode runs if available hardware permits"
+without any fallback: no subsetting, no shrinkage, no relabelling.
+
+### Comparison against the authors' published output
+
+| | published `sugarR_100Hz.parquet` | FlyBrain whole-brain |
+|---|---|---|
+| stimulus | sugar GRNs @100 Hz | sugar GRNs @100 Hz |
+| trials | 30 | 1 |
+| sugar GRN rate | 98.8 Hz (median) | 105.6 Hz |
+| active neurons | 404 | 376 |
+| **MN9 left** | **67.03 Hz** | **66.00 Hz** |
+| monosynaptic sugar-GRN → responder edges | — | 177 edges / 2 282 synapses |
+
+MN9-left agrees to **1.5 %** and the active-neuron count to **7 %**, under a different
+RNG (Brian 2's `PoissonInput` vs NumPy PCG64), a single trial rather than a 30-trial
+mean, and a different sub-step ordering from the chaobrain port. That is a much
+stronger agreement than expected and it is the strongest single piece of evidence in
+this project.
+
+**It is still not a quantitative reproduction claim**, for a reason that matters: the
+agreement could be partly coincidental. The honest way to establish a quantitative
+claim is to run the matched protocol (30 trials, same conditions) and compare the
+*distribution*, which costs roughly 16 hours at the measured 196 ms/step and **has not
+been run**. One number matching to 1.5 % is encouraging; it is not proof.
+
+The subset run of the same protocol gives MN9-left **97.5 Hz**, 45 % above the
+published value — because a truncated subset removes part of MN9's convergent input.
+That contrast is itself informative: it shows that convergence, not a single pathway,
+is what drives this network, and it is why every subset result is labelled.
+
+---
+
+## Profiling (all figures measured, not modelled)
+
+`scripts/profile_pipeline.py`; raw results in `outputs/profile_*.json`.
+
+| stage | subset (8 000 neurons / 442 346 edges) | whole-brain (127 400 / 14 687 178) |
+|---|---|---|
+| parquet decode (cold) | 0.82 s | 0.75 s |
+| processed-cache load | 0.25 s | 0.18 s (4× faster than cold) |
+| CSR construction | 0.14 s | 0.15 s |
+| subset extraction | 0.41 s | n/a |
+| network construction | 0.005 s | 0.062 s |
+| **simulation step** | **5.8 ms** | **205.7 ms** |
+| recording: population rates | +0.06 ms/step (×1.01) | within noise (×0.96) |
+| recording: all spikes | +0.47 ms/step (×1.08) | within noise (×0.96) |
+
+Two findings worth stating:
+
+1. **Recording is not a bottleneck at either scale.** The spike set is so sparse
+   (1.30 active neurons per step at whole-brain scale) that appending to a list costs
+   less than the run-to-run variance. The channels stay opt-in for output-size
+   reasons, not CPU reasons.
+2. **The cold load path was the one real memory problem, and it is fixed.** Profiling
+   showed ~2.4 GB of peak RSS to load a 90 MB file, because `read_parquet`
+   materialises all seven columns as int64. Four of those columns (`Presynaptic_ID`,
+   `Postsynaptic_ID`, `Connectivity`, `Excitatory`) were read and never consumed.
+   Narrowing the load path to the three columns the simulation uses cut the measured
+   RSS delta from **2 428 MB to 1 356 MB (−44 %)**. The full column set is now read
+   only by the verification path, which uses it for an integrity check that would
+   otherwise be unaffordable.
+
+### Bottleneck identified, deliberately not yet optimised
+
+The step is dominated by work proportional to the **edge count**, not the activity:
+a full gather over all 14.7 M edges (`weights * delayed[pre]`) plus a `bincount`
+scatter-add, i.e. ~120 MB of memory traffic per step regardless of how many neurons
+spike. With only 1.30 neurons active per step on average, propagating only the
+outgoing edges of neurons that actually spiked would remove the overwhelming majority
+of that traffic.
+
+This is **not implemented**, because the objective says to profile a correct
+implementation before optimising, and the profile is what justifies the change. It is
+the first item of the next milestone.
 
 ---
 
 ## Known engineering limitations
 
-1. **Whole-brain throughput.** 204 ms/step is dominated by a full gather over all
+1. **Whole-brain throughput.** 196 ms/step is dominated by a full gather over all
    14.7 M edges (`weights * delayed[pre]`) plus a `bincount` scatter-add, i.e. ~120 MB
-   of memory traffic per step regardless of how many neurons actually spike. An
-   active-set-only propagation (touch only the outgoing edges of neurons that spiked)
-   is the obvious optimisation and is *deliberately not implemented yet*, because the
-   objective says to profile a correct implementation before optimising. The profile
-   exists (`scripts/profile_pipeline.py`); the optimisation does not.
+   of memory traffic per step regardless of how many neurons actually spike — and only
+   **1.30 neurons are active per step on average**. An active-set-only propagation
+   (touch only the outgoing edges of neurons that spiked) is the obvious optimisation
+   and is *deliberately not implemented yet*, because the objective says to profile a
+   correct implementation before optimising. The profile exists
+   (`outputs/profile_*.json`); the optimisation does not.
 2. **`bincount` accumulates in float64** before narrowing back to float32. That
    doubles the scatter traffic and is the single biggest cost in the step. It is the
    honest NumPy expression of the semantics; a hand-written kernel would not need it.
@@ -165,31 +250,37 @@ See `docs/SCIENTIFIC_BOUNDARIES.md` for the full argument. In brief:
 
 ## Honest limits on the "reproduces a published result" claim
 
-The comparison is **qualitative and structural**, not quantitative:
+The structural and qualitative claims are established. The **quantitative** claim is
+not, and here is the full accounting.
 
-| | published (`sugarR_100Hz.parquet`) | FlyBrain (8 000-neuron subset) |
-|---|---|---|
-| stimulus | sugar GRNs @100 Hz, 30 trials | sugar GRNs @100 Hz, 1 trial |
-| sugar GRN rate | 98.8 Hz (median) | 105.6 Hz |
-| active neurons | 404 | 253 |
-| MN9 left | 67.03 Hz | 97.50 Hz |
-| MN9 right | 48.63 Hz | not measured separately in that run |
+What holds up:
 
-The direction and the *sparsity* agree: driving a small sensory population produces a
-response in a few hundred neurons, and MN9 is among the driven. The magnitudes do
-not, and are not expected to:
+* driving the declared sensory population drives the declared readout: MN9-left is
+  66.00 Hz against a published 67.03 Hz;
+* the response is *sparse*: 376 active of 127 400 neurons, against 404 published;
+* it is *reachable*: 177 directed edges / 2 282 synapses run from the sugar GRNs onto
+  the responders, so the result is not a numerical artefact of unrelated neurons;
+* it is *attributable*: with no stimulus the same model produces exactly zero spikes.
 
-* different RNG (upstream uses Brian 2's `PoissonInput`), so different Poisson
-  realisations;
-* 1 trial here versus 30 upstream, and the upstream figure is a 30-trial mean;
-* a **truncated subset** here, which removes part of MN9's convergent input;
-* different sub-step ordering from the chaobrain port
-  (`docs/UPSTREAM_AUDIT.md` §4.1).
+What is not established:
 
-Running the matched protocol (whole-brain, 30 trials, 100 Hz) would be the honest way
-to make a quantitative claim, and would cost roughly 17 hours of wall time on this
-machine at the measured 204 ms/step. It has **not** been run. That is the difference
-between "consistent with" and "reproduces", and this document does not elide it.
+* **one number agreeing to 1.5 % is not a reproduction.** It is one readout, on one
+  trial, on one machine. A quantitative claim needs the distribution over trials;
+* 1 trial here versus 30 upstream, and the published value is a 30-trial mean;
+* different RNG (Brian 2's `PoissonInput` versus NumPy PCG64), so different Poisson
+  realisations — the sugar GRN rate itself differs (105.6 vs 98.8 Hz) before any
+  downstream effect is considered;
+* a side-by-side subset run of the same protocol gives MN9-left **97.5 Hz**, i.e. 45 %
+  *above* the published value, purely because a truncated subset removes part of MN9's
+  convergent input. So the model's readout is sensitive to which inputs are present,
+  and the agreement in the whole-brain case should be read with that in mind;
+* the MN9-right readout was not compared in the whole-brain run;
+* no comparison against any biological measurement was made, and none is claimed.
+
+Running the matched protocol (whole-brain, 30 trials, 100 Hz) would make a
+quantitative claim possible. At the measured 196 ms/step that is roughly **16 hours**
+of wall time, and it **has not been run**. That is the difference between "consistent
+with" and "reproduces", and this document does not elide it.
 
 ---
 

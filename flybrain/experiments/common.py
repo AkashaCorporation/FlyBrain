@@ -101,6 +101,25 @@ def load_dataset(dataset_id: str, *, quiet: bool = False):
     return conn
 
 
+def default_seed_ids(connectome, registry: Optional[PopulationRegistry] = None) -> List[int]:
+    """Working-set seeds for an experiment that declares no stimulus.
+
+    The baseline experiment has nothing to seed from, but "no stimulus" must still
+    mean *a defined network*, not an error. Seeding from the sugar circuit plus the
+    MN9 readout makes the baseline comparable to the stimulation experiments: same
+    working set, same neurons, only the stimulus differs.
+    """
+    reg = registry or PopulationRegistry.builtin()
+    seeds: List[int] = []
+    for name in ("sugar_grn", "mn9"):
+        try:
+            present, _missing = reg.resolve(name, connectome.flywire_ids)
+        except Exception:
+            continue
+        seeds.extend(int(x) for x in present.tolist())
+    return sorted(set(seeds))
+
+
 def announce(conn, hw, backend, cfg: RunConfig, extra: Optional[Dict[str, Any]] = None) -> None:
     print()
     print(

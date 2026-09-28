@@ -148,6 +148,28 @@ The report distinguishes `fail` (the dataset violates an invariant that makes
 simulation meaningless — abort) from `warn` (a true property the operator must know
 about — proceed, but record it). Six warnings on `flywire_630`, zero failures.
 
+### The ID ↔ index check (verification path only)
+
+`flybrain datasets --verify` and `--report` additionally run
+`check_id_index_consistency`, which proves that index `k` really does name the neuron
+whose FlyWire root ID is `Presynaptic_ID[k]`, for every edge. Measured:
+
+```
+ID<->index consistency: [pass] 29374356 endpoint(s) checked; 0 mismatch(es)
+```
+
+This is the check that makes "neuron IDs are preserved" a verified statement rather
+than an assertion, and it is the reason the full seven-column read still exists in the
+codebase.
+
+It runs only on the verification path, because reading all seven columns costs
+**~2.4 GB of peak RSS** on the cold path: `read_parquet` materialises each column as
+int64 before anything is narrowed, and four of those columns
+(`Presynaptic_ID`, `Postsynaptic_ID`, `Connectivity`, `Excitatory`) are not consumed
+by the simulation at all. Narrowing the load path to the three columns the simulation
+uses cut the measured RSS delta from **2 428 MB to 1 356 MB (−44 %)**, so the
+expensive read is now paid deliberately once, instead of on every run.
+
 ---
 
 ## 5. Curated populations

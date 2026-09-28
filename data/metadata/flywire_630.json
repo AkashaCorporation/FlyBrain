@@ -32,6 +32,7 @@
     "neurons_unknown_sign": 385,
     "validation_failures": 0,
     "validation_warnings": 3,
-    "counts_measured_at": "2026-09-28T18:37:30Z"
+    "counts_measured_at": "2026-09-28T18:47:52Z",
+    "id_index_consistency": "pass"
   }
 }

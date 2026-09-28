@@ -107,6 +107,55 @@ class DatasetReport:
         }
 
 
+def check_id_index_consistency(conn: Connectome, raw: Dict[str, np.ndarray]) -> Check:
+    """Verify that the FlyWire ID columns agree with the index columns.
+
+    This is the check that makes the phrase "neuron IDs are preserved" mean something:
+    it proves that index ``k`` really does name the neuron whose FlyWire root ID is
+    ``Presynaptic_ID[k]``, for every edge.
+
+    It compares the *raw* arrays, which are row-aligned with each other. ``conn.pre``
+    is sorted by presynaptic index while the file's ID column is in file order, so
+    pairing a raw ID column against a sorted index column would be wrong.
+
+    Requires the full column set (and therefore extra memory), so it runs on the
+    verification path rather than on every load.
+    """
+    pre_id = raw.get("pre_id")
+    post_id = raw.get("post_id")
+    if pre_id is None or post_id is None:
+        return Check(
+            "flywire_id_index_consistency",
+            WARN,
+            "ID columns were not read, so the ID<->index mapping could not be checked "
+            "(use `flybrain datasets --verify` for the full check)",
+            None,
+        )
+
+    ids = conn.flywire_ids
+    checked = 0
+    bad = 0
+    for index_col, id_col, name in (
+        (raw["pre"], pre_id, "Presynaptic"),
+        (raw["post"], post_id, "Postsynaptic"),
+    ):
+        if index_col.size and (index_col.min() < 0 or index_col.max() >= ids.size):
+            return Check(
+                "flywire_id_index_consistency", FAIL,
+                f"{name}_Index contains values outside [0, {ids.size})", None,
+            )
+        checked += int(index_col.size)
+        bad += int((ids[index_col] != id_col).sum())
+
+    return Check(
+        "flywire_id_index_consistency",
+        PASS if bad == 0 else FAIL,
+        f"{checked} endpoint(s) checked; {bad} mismatch(es) between the FlyWire ID "
+        f"columns and the neuron table's index order",
+        bad,
+    )
+
+
 def validate_connectome(
     conn: Connectome,
     *,

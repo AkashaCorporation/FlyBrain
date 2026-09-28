@@ -33,10 +33,20 @@ COL_SYNAPSE_COUNT = "Connectivity"
 COL_EXCITATORY = "Excitatory"
 COL_SIGNED_COUNT = "Excitatory x Connectivity"
 
-#: Columns we actually read. The ID columns are read only for validation, because the
-#: simulation works in integer-index space; the ID column is the provenance link back
-#: to FlyWire.
-CONNECTIVITY_COLUMNS = [
+#: The only columns the simulation consumes: the two endpoint indices and the signed
+#: synapse count. Reading just these is not a micro-optimisation - it is the difference
+#: between ~0.5 GB and ~2.4 GB of peak RSS on the cold path, because ``read_parquet``
+#: materialises every requested column as int64 before anything is narrowed.
+CONNECTIVITY_COLUMNS_MINIMAL = [
+    COL_PRE_INDEX,
+    COL_POST_INDEX,
+    COL_SIGNED_COUNT,
+]
+
+#: Every column in the table. Used by the thorough verification path, which checks
+#: that the FlyWire ID columns agree with the index columns - an integrity check worth
+#: its memory cost when run deliberately, and waste on every simulate.
+CONNECTIVITY_COLUMNS_FULL = [
     COL_PRE_ID,
     COL_POST_ID,
     COL_PRE_INDEX,
