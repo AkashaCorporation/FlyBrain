@@ -1,0 +1,1436 @@
+{
+  "schema_version": 1,
+  "note": "Curated neuron populations, parsed from the upstream repositories. These are the ONLY neuron-type information available to FlyBrain: the FlyWire-derived dataset itself ships no cell-type column. ID lists are sorted and de-duplicated; the upstream symbol each list came from is recorded so it can be re-verified.",
+  "sources": [
+    {
+      "file": "third_party/Drosophila_brain_model/figures.ipynb",
+      "sha256": "16fa15a05378dd6be348925f3ccfe6e0eb02c560f06dcc81d6ea4c5267f37f0b"
+    },
+    {
+      "file": "third_party/Drosophila_brain_model/example.ipynb",
+      "sha256": "ff86ffe82c9e280be5a0a5d8b3110f9454faebac19d2b0c9671558cb1f710ff9"
+    },
+    {
+      "file": "third_party/Drosophila_brain_model/../drosophila_whole_brain_snn_simulation/brainstate_figures.ipynb",
+      "sha256": "59aba3bbfc7b3b92dce2d74770449d4622a973104a296e016d564dfb19aa4f7d"
+    },
+    {
+      "file": "third_party/Drosophila_brain_model/sez_neurons.pickle",
+      "sha256": "2bc5a2a8289924f2de39a8e68bdc07025cb6d6c6c6ddc83a973c0cace7cec2ce"
+    }
+  ],
+  "populations": {
+    "sugar_grn": {
+      "ids": [
+        720575940611875570,
+        720575940612670570,
+        720575940616885538,
+        720575940617000768,
+        720575940617937543,
+        720575940620900446,
+        720575940621502051,
+        720575940621754367,
+        720575940624963786,
+        720575940628853239,
+        720575940629176663,
+        720575940630233916,
+        720575940630797113,
+        720575940632425919,
+        720575940632889389,
+        720575940633143833,
+        720575940637568838,
+        720575940638202345,
+        720575940639198653,
+        720575940639332736,
+        720575940640649691
+      ],
+      "description": "Labellar sugar-sensing gustatory receptor neurons, right hemisphere",
+      "upstream_symbol": "neu_sugar"
+    },
+    "bitter_grn": {
+      "ids": [
+        720575940602353632,
+        720575940604027168,
+        720575940610259370,
+        720575940610481370,
+        720575940610483162,
+        720575940613061118,
+        720575940614281266,
+        720575940617094208,
+        720575940618600651,
+        720575940619028208,
+        720575940619197093,
+        720575940621008895,
+        720575940621778381,
+        720575940622298631,
+        720575940626287336,
+        720575940627578156,
+        720575940627692048,
+        720575940629146711,
+        720575940630195909,
+        720575940645743412,
+        720575940646212996
+      ],
+      "description": "Labellar bitter-sensing gustatory receptor neurons, right hemisphere",
+      "upstream_symbol": "neu_bitter"
+    },
+    "ir94e_grn": {
+      "ids": [
+        720575940610683315,
+        720575940612920386,
+        720575940614211295,
+        720575940614273292,
+        720575940615089369,
+        720575940615274425,
+        720575940619387814,
+        720575940621375231,
+        720575940624079544,
+        720575940624604560,
+        720575940626016017,
+        720575940626241636,
+        720575940627265265,
+        720575940628198503,
+        720575940628832256,
+        720575940629211607,
+        720575940631082124,
+        720575940638218173
+      ],
+      "description": "IR94e-expressing gustatory receptor neurons (sugar-adjacent taste class)",
+      "upstream_symbol": "neu_ir94e"
+    },
+    "water_grn": {
+      "ids": [
+        720575940606002609,
+        720575940612579053,
+        720575940612950568,
+        720575940613786774,
+        720575940613996959,
+        720575940616177458,
+        720575940617857694,
+        720575940622486922,
+        720575940622902535,
+        720575940625203504,
+        720575940625861168,
+        720575940629852866,
+        720575940630553415,
+        720575940631898285,
+        720575940634796536,
+        720575940635172191,
+        720575940644965399,
+        720575940660292225
+      ],
+      "description": "Labellar water-sensing gustatory receptor neurons, right hemisphere",
+      "upstream_symbol": "neu_water"
+    },
+    "jon_ce_grn": {
+      "ids": [
+        720575940602132509,
+        720575940602506208,
+        720575940602720940,
+        720575940604753437,
+        720575940608742409,
+        720575940609522461,
+        720575940609541917,
+        720575940610018266,
+        720575940611061526,
+        720575940611783464,
+        720575940613971485,
+        720575940614035485,
+        720575940614060829,
+        720575940614188149,
+        720575940614351477,
+        720575940614427195,
+        720575940615809349,
+        720575940615848788,
+        720575940615986459,
+        720575940616589878,
+        720575940616951124,
+        720575940618467195,
+        720575940618599872,
+        720575940618684481,
+        720575940619341105,
+        720575940620382889,
+        720575940621397417,
+        720575940621442224,
+        720575940621625597,
+        720575940621729757,
+        720575940622449388,
+        720575940622937528,
+        720575940623298559,
+        720575940624799290,
+        720575940624915230,
+        720575940625559358,
+        720575940625797617,
+        720575940625962568,
+        720575940626042149,
+        720575940626307902,
+        720575940626565455,
+        720575940627109991,
+        720575940627585688,
+        720575940627941431,
+        720575940628101126,
+        720575940628444667,
+        720575940628978450,
+        720575940629022149,
+        720575940629055721,
+        720575940629138959,
+        720575940629650997,
+        720575940630020111,
+        720575940630059847,
+        720575940630070343,
+        720575940630080071,
+        720575940630122015,
+        720575940630319671,
+        720575940630564179,
+        720575940631866508,
+        720575940632449619,
+        720575940632767383,
+        720575940633153375,
+        720575940634634606,
+        720575940637054835,
+        720575940637410869,
+        720575940637632419,
+        720575940638664437,
+        720575940638681845,
+        720575940641921421,
+        720575940650244342
+      ],
+      "description": "Johnston's organ neurons, CE subtype",
+      "upstream_symbol": "neu_JON_CE"
+    },
+    "jon_f_grn": {
+      "ids": [
+        720575940604299454,
+        720575940604973746,
+        720575940606222428,
+        720575940606239243,
+        720575940606431189,
+        720575940606611401,
+        720575940606657493,
+        720575940606800341,
+        720575940608297774,
+        720575940609530653,
+        720575940609543197,
+        720575940610008217,
+        720575940613012959,
+        720575940613105311,
+        720575940614026269,
+        720575940614929245,
+        720575940615473186,
+        720575940616613022,
+        720575940617273560,
+        720575940617524053,
+        720575940618888368,
+        720575940621097398,
+        720575940621521917,
+        720575940621532413,
+        720575940622179497,
+        720575940622217992,
+        720575940622222856,
+        720575940623077389,
+        720575940623791152,
+        720575940624224408,
+        720575940624308355,
+        720575940625087546,
+        720575940625571240,
+        720575940625703434,
+        720575940625733960,
+        720575940625763015,
+        720575940625885512,
+        720575940625915338,
+        720575940626956777,
+        720575940627523584,
+        720575940627704375,
+        720575940627868471,
+        720575940628100614,
+        720575940628359017,
+        720575940628649465,
+        720575940628935564,
+        720575940629267498,
+        720575940629386819,
+        720575940629502009,
+        720575940629719404,
+        720575940631170346,
+        720575940633364179,
+        720575940634923621,
+        720575940635968745,
+        720575940637366335,
+        720575940638529525,
+        720575940639410035,
+        720575940640591861,
+        720575940642517284,
+        720575940647493241
+      ],
+      "description": "Johnston's organ neurons, F subtype",
+      "upstream_symbol": "neu_JON_F"
+    },
+    "jon_all": {
+      "ids": [
+        720575940602132509,
+        720575940602506208,
+        720575940602720940,
+        720575940604299454,
+        720575940604753437,
+        720575940604973746,
+        720575940606222428,
+        720575940606239243,
+        720575940606431189,
+        720575940606611401,
+        720575940606657493,
+        720575940606800341,
+        720575940608297774,
+        720575940608742409,
+        720575940609522461,
+        720575940609530653,
+        720575940609541917,
+        720575940609543197,
+        720575940610008217,
+        720575940610018266,
+        720575940611061526,
+        720575940611783464,
+        720575940613012959,
+        720575940613105311,
+        720575940613971485,
+        720575940614026269,
+        720575940614035485,
+        720575940614060829,
+        720575940614188149,
+        720575940614351477,
+        720575940614427195,
+        720575940614929245,
+        720575940615473186,
+        720575940615809349,
+        720575940615848788,
+        720575940615986459,
+        720575940616064546,
+        720575940616589878,
+        720575940616613022,
+        720575940616951124,
+        720575940617273560,
+        720575940617524053,
+        720575940618467195,
+        720575940618599872,
+        720575940618684481,
+        720575940618888368,
+        720575940619085397,
+        720575940619341105,
+        720575940620382889,
+        720575940621097398,
+        720575940621289537,
+        720575940621397417,
+        720575940621442224,
+        720575940621521917,
+        720575940621532413,
+        720575940621625597,
+        720575940621729757,
+        720575940622179497,
+        720575940622217992,
+        720575940622222856,
+        720575940622449388,
+        720575940622892988,
+        720575940622937528,
+        720575940623077389,
+        720575940623298559,
+        720575940623791152,
+        720575940624224408,
+        720575940624308355,
+        720575940624799290,
+        720575940624915230,
+        720575940625087546,
+        720575940625559358,
+        720575940625571240,
+        720575940625703434,
+        720575940625733960,
+        720575940625763015,
+        720575940625797617,
+        720575940625885512,
+        720575940625915338,
+        720575940625962568,
+        720575940626042149,
+        720575940626307902,
+        720575940626557995,
+        720575940626565455,
+        720575940626956777,
+        720575940627109991,
+        720575940627493096,
+        720575940627523584,
+        720575940627585688,
+        720575940627704375,
+        720575940627868471,
+        720575940627941431,
+        720575940628100614,
+        720575940628101126,
+        720575940628359017,
+        720575940628444667,
+        720575940628649465,
+        720575940628935564,
+        720575940628978409,
+        720575940628978450,
+        720575940629022149,
+        720575940629055721,
+        720575940629138959,
+        720575940629141775,
+        720575940629267498,
+        720575940629386819,
+        720575940629502009,
+        720575940629650997,
+        720575940629719404,
+        720575940630020111,
+        720575940630059847,
+        720575940630070343,
+        720575940630080071,
+        720575940630122015,
+        720575940630319671,
+        720575940630564179,
+        720575940630834171,
+        720575940631098338,
+        720575940631170346,
+        720575940631866508,
+        720575940632449619,
+        720575940632767383,
+        720575940633153375,
+        720575940633364179,
+        720575940634634606,
+        720575940634923621,
+        720575940635067034,
+        720575940635545310,
+        720575940635968745,
+        720575940637054835,
+        720575940637366335,
+        720575940637410869,
+        720575940637632419,
+        720575940638529525,
+        720575940638664437,
+        720575940638681845,
+        720575940639410035,
+        720575940639904475,
+        720575940640591861,
+        720575940641395163,
+        720575940641921421,
+        720575940642517284,
+        720575940645728803,
+        720575940647493241,
+        720575940650244342,
+        720575940652566177
+      ],
+      "description": "All Johnston's organ neurons (CE + F)",
+      "upstream_symbol": "neu_JON_all"
+    },
+    "mn9": {
+      "ids": [
+        720575940645521262,
+        720575940660219265
+      ],
+      "description": "MN9 motor neurons (left and right); the paper's main sensorimotor readout",
+      "upstream_symbol": "ids_mn9"
+    },
+    "sez_aDT6": {
+      "ids": [
+        720575940604764862,
+        720575940612302506,
+        720575940620306300,
+        720575940626512881,
+        720575940630165007,
+        720575940631570636,
+        720575940635191438,
+        720575940637381466,
+        720575940637531369,
+        720575940638900469,
+        720575940644751651
+      ],
+      "description": "SEZ cell type aDT6 (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['aDT6']"
+    },
+    "sez_amulet": {
+      "ids": [
+        720575940604470240,
+        720575940635211768
+      ],
+      "description": "SEZ cell type amulet (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['amulet']"
+    },
+    "sez_aSG1": {
+      "ids": [
+        720575940620829878,
+        720575940633376301
+      ],
+      "description": "SEZ cell type aSG1 (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['aSG1']"
+    },
+    "sez_aSG7": {
+      "ids": [
+        720575940613428707,
+        720575940620879809,
+        720575940622273868,
+        720575940625082298,
+        720575940636928398
+      ],
+      "description": "SEZ cell type aSG7 (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['aSG7']"
+    },
+    "sez_aster": {
+      "ids": [
+        720575940614965691,
+        720575940619453831,
+        720575940621982413,
+        720575940623988733
+      ],
+      "description": "SEZ cell type aster (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['aster']"
+    },
+    "sez_Asteroid": {
+      "ids": [
+        720575940614235323,
+        720575940623697898,
+        720575940632835923
+      ],
+      "description": "SEZ cell type Asteroid (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['Asteroid']"
+    },
+    "sez_bamboo": {
+      "ids": [
+        720575940612107673,
+        720575940634333631
+      ],
+      "description": "SEZ cell type bamboo (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['bamboo']"
+    },
+    "sez_basket": {
+      "ids": [
+        720575940613043939,
+        720575940613950530,
+        720575940616287645,
+        720575940618299216,
+        720575940620183462,
+        720575940621614246,
+        720575940624005868,
+        720575940626412298,
+        720575940626922810,
+        720575940627565059,
+        720575940628069904,
+        720575940628134555,
+        720575940631177809,
+        720575940631416121,
+        720575940633611418
+      ],
+      "description": "SEZ cell type basket (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['basket']"
+    },
+    "sez_bluebell": {
+      "ids": [
+        720575940631168057,
+        720575940635166571
+      ],
+      "description": "SEZ cell type bluebell (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['bluebell']"
+    },
+    "sez_bobber": {
+      "ids": [
+        720575940621628582
+      ],
+      "description": "SEZ cell type bobber (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['bobber']"
+    },
+    "sez_box": {
+      "ids": [
+        720575940633340953,
+        720575940637849822
+      ],
+      "description": "SEZ cell type box (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['box']"
+    },
+    "sez_bract": {
+      "ids": [
+        720575940610001220,
+        720575940626557442,
+        720575940627285267,
+        720575940645045527
+      ],
+      "description": "SEZ cell type bract (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['bract']"
+    },
+    "sez_bridle": {
+      "ids": [
+        720575940627293201,
+        720575940637851069,
+        720575940638394446,
+        720575940643847022
+      ],
+      "description": "SEZ cell type bridle (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['bridle']"
+    },
+    "sez_brontosaraus": {
+      "ids": [
+        720575940609030776,
+        720575940609617614,
+        720575940619559838,
+        720575940621089741,
+        720575940626390018,
+        720575940627514627,
+        720575940627947772,
+        720575940628362058,
+        720575940632852124,
+        720575940636592270,
+        720575940636734382,
+        720575940638642547
+      ],
+      "description": "SEZ cell type brontosaraus (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['brontosaraus']"
+    },
+    "sez_broom": {
+      "ids": [
+        720575940612033253,
+        720575940624710653
+      ],
+      "description": "SEZ cell type broom (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['broom']"
+    },
+    "sez_buddy": {
+      "ids": [
+        720575940618028125,
+        720575940626961241,
+        720575940647010356
+      ],
+      "description": "SEZ cell type buddy (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['buddy']"
+    },
+    "sez_clavicle": {
+      "ids": [
+        720575940632648868,
+        720575940655014049
+      ],
+      "description": "SEZ cell type clavicle (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['clavicle']"
+    },
+    "sez_coy": {
+      "ids": [
+        720575940618156689
+      ],
+      "description": "SEZ cell type coy (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['coy']"
+    },
+    "sez_crab": {
+      "ids": [
+        720575940626140164,
+        720575940635206251
+      ],
+      "description": "SEZ cell type crab (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['crab']"
+    },
+    "sez_cradle": {
+      "ids": [
+        720575940620979638,
+        720575940625716357
+      ],
+      "description": "SEZ cell type cradle (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['cradle']"
+    },
+    "sez_damsel": {
+      "ids": [
+        720575940621583286,
+        720575940623457535
+      ],
+      "description": "SEZ cell type damsel (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['damsel']"
+    },
+    "sez_diatom": {
+      "ids": [
+        720575940605699104,
+        720575940614897458,
+        720575940617303857,
+        720575940619697134,
+        720575940621717025,
+        720575940622198230,
+        720575940626679317,
+        720575940627854595,
+        720575940627979782,
+        720575940628527439,
+        720575940637107312,
+        720575940638280270,
+        720575940638726717,
+        720575940641058523
+      ],
+      "description": "SEZ cell type diatom (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['diatom']"
+    },
+    "sez_doublescoop": {
+      "ids": [
+        720575940620506996,
+        720575940623366538
+      ],
+      "description": "SEZ cell type doublescoop (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['doublescoop']"
+    },
+    "sez_earmuff": {
+      "ids": [
+        720575940611411057,
+        720575940629013199,
+        720575940631448874,
+        720575940635642725
+      ],
+      "description": "SEZ cell type earmuff (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['earmuff']"
+    },
+    "sez_eiffel": {
+      "ids": [
+        720575940627327238,
+        720575940629468026
+      ],
+      "description": "SEZ cell type eiffel (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['eiffel']"
+    },
+    "sez_Fdg": {
+      "ids": [
+        720575940631997032,
+        720575940647030324
+      ],
+      "description": "SEZ cell type Fdg (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['Fdg']"
+    },
+    "sez_fluff": {
+      "ids": [
+        720575940632134227,
+        720575940637360730
+      ],
+      "description": "SEZ cell type fluff (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['fluff']"
+    },
+    "sez_FMIn": {
+      "ids": [
+        720575940614763666,
+        720575940636675214
+      ],
+      "description": "SEZ cell type FMIn (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['FMIn']"
+    },
+    "sez_foxglove": {
+      "ids": [
+        720575940611160930,
+        720575940628755815
+      ],
+      "description": "SEZ cell type foxglove (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['foxglove']"
+    },
+    "sez_fudog": {
+      "ids": [
+        720575940612648106,
+        720575940632877869
+      ],
+      "description": "SEZ cell type fudog (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['fudog']"
+    },
+    "sez_G2N_1": {
+      "ids": [
+        720575940620874757,
+        720575940623718380
+      ],
+      "description": "SEZ cell type G2N_1 (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['G2N_1']"
+    },
+    "sez_gallinule": {
+      "ids": [
+        720575940618926757,
+        720575940623301256,
+        720575940626519704,
+        720575940628046635,
+        720575940629663596,
+        720575940630620687,
+        720575940638597283,
+        720575940639485648,
+        720575940640464373,
+        720575940645859972
+      ],
+      "description": "SEZ cell type gallinule (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['gallinule']"
+    },
+    "sez_gazebo": {
+      "ids": [
+        720575940620287623,
+        720575940641282267
+      ],
+      "description": "SEZ cell type gazebo (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['gazebo']"
+    },
+    "sez_genie": {
+      "ids": [
+        720575940615323298,
+        720575940626179614,
+        720575940627366675,
+        720575940636029807
+      ],
+      "description": "SEZ cell type genie (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['genie']"
+    },
+    "sez_gnome": {
+      "ids": [
+        720575940610232274,
+        720575940648864633
+      ],
+      "description": "SEZ cell type gnome (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['gnome']"
+    },
+    "sez_good_dog": {
+      "ids": [
+        720575940621326324,
+        720575940631740497
+      ],
+      "description": "SEZ cell type good_dog (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['good_dog']"
+    },
+    "sez_gumdrop": {
+      "ids": [
+        720575940630697078,
+        720575940631110095
+      ],
+      "description": "SEZ cell type gumdrop (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['gumdrop']"
+    },
+    "sez_handle": {
+      "ids": [
+        720575940620527830,
+        720575940620879476,
+        720575940628306114,
+        720575940629592567
+      ],
+      "description": "SEZ cell type handle (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['handle']"
+    },
+    "sez_handup": {
+      "ids": [
+        720575940611697394,
+        720575940612206810
+      ],
+      "description": "SEZ cell type handup (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['handup']"
+    },
+    "sez_haystack": {
+      "ids": [
+        720575940615071391,
+        720575940619741104
+      ],
+      "description": "SEZ cell type haystack (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['haystack']"
+    },
+    "sez_horntail": {
+      "ids": [
+        720575940608451420,
+        720575940631293202
+      ],
+      "description": "SEZ cell type horntail (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['horntail']"
+    },
+    "sez_horseshoe": {
+      "ids": [
+        720575940603514141,
+        720575940604130481,
+        720575940620798284,
+        720575940621373278,
+        720575940622028778,
+        720575940623600619,
+        720575940627498499,
+        720575940630619719,
+        720575940632012243
+      ],
+      "description": "SEZ cell type horseshoe (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['horseshoe']"
+    },
+    "sez_horn": {
+      "ids": [
+        720575940604722278,
+        720575940621333509,
+        720575940630133110
+      ],
+      "description": "SEZ cell type horn (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['horn']"
+    },
+    "sez_hound": {
+      "ids": [
+        720575940628676457,
+        720575940630094652
+      ],
+      "description": "SEZ cell type hound (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['hound']"
+    },
+    "sez_hyacinth": {
+      "ids": [
+        720575940620096171,
+        720575940623044103,
+        720575940624532408,
+        720575940626015640,
+        720575940630548751,
+        720575940654057889
+      ],
+      "description": "SEZ cell type hyacinth (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['hyacinth']"
+    },
+    "sez_justice": {
+      "ids": [
+        720575940614660519,
+        720575940635175007
+      ],
+      "description": "SEZ cell type justice (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['justice']"
+    },
+    "sez_kelp": {
+      "ids": [
+        720575940612289010,
+        720575940622474899,
+        720575940635239672,
+        720575940636895406
+      ],
+      "description": "SEZ cell type kelp (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['kelp']"
+    },
+    "sez_kitty": {
+      "ids": [
+        720575940610056772,
+        720575940624987175,
+        720575940627704392,
+        720575940644669732
+      ],
+      "description": "SEZ cell type kitty (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['kitty']"
+    },
+    "sez_knees": {
+      "ids": [
+        720575940609589443,
+        720575940627731176
+      ],
+      "description": "SEZ cell type knees (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['knees']"
+    },
+    "sez_kokopelli": {
+      "ids": [
+        720575940613761858,
+        720575940634251164
+      ],
+      "description": "SEZ cell type kokopelli (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['kokopelli']"
+    },
+    "sez_landslide": {
+      "ids": [
+        720575940617563577,
+        720575940634290913
+      ],
+      "description": "SEZ cell type landslide (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['landslide']"
+    },
+    "sez_lion": {
+      "ids": [
+        720575940621900981,
+        720575940630788882
+      ],
+      "description": "SEZ cell type lion (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['lion']"
+    },
+    "sez_mandala": {
+      "ids": [
+        720575940610390746,
+        720575940616648251,
+        720575940617437697,
+        720575940625979650,
+        720575940626548605,
+        720575940632089887,
+        720575940632316205,
+        720575940636079502,
+        720575940639295696,
+        720575940651919094
+      ],
+      "description": "SEZ cell type mandala (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['mandala']"
+    },
+    "sez_marge": {
+      "ids": [
+        720575940610690372,
+        720575940620262465
+      ],
+      "description": "SEZ cell type marge (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['marge']"
+    },
+    "sez_meteor": {
+      "ids": [
+        720575940635112544,
+        720575940645474583
+      ],
+      "description": "SEZ cell type meteor (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['meteor']"
+    },
+    "sez_mime": {
+      "ids": [
+        720575940613828202,
+        720575940614223154,
+        720575940621149709,
+        720575940622688765,
+        720575940624253991,
+        720575940624273149,
+        720575940627936515,
+        720575940629598935,
+        720575940630575943,
+        720575940634788247,
+        720575940634844408,
+        720575940637742150,
+        720575940637788137,
+        720575940638557312
+      ],
+      "description": "SEZ cell type mime (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['mime']"
+    },
+    "sez_mist": {
+      "ids": [
+        720575940637216624,
+        720575940646530612
+      ],
+      "description": "SEZ cell type mist (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['mist']"
+    },
+    "sez_moor": {
+      "ids": [
+        720575940611849826,
+        720575940635574958
+      ],
+      "description": "SEZ cell type moor (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['moor']"
+    },
+    "sez_mothership": {
+      "ids": [
+        720575940620714150,
+        720575940644758308
+      ],
+      "description": "SEZ cell type mothership (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['mothership']"
+    },
+    "sez_mute": {
+      "ids": [
+        720575940616921629,
+        720575940630119532
+      ],
+      "description": "SEZ cell type mute (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['mute']"
+    },
+    "sez_nagini": {
+      "ids": [
+        720575940625870640,
+        720575940627825923
+      ],
+      "description": "SEZ cell type nagini (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['nagini']"
+    },
+    "sez_nori": {
+      "ids": [
+        720575940616851030,
+        720575940630670454,
+        720575940630679801
+      ],
+      "description": "SEZ cell type nori (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['nori']"
+    },
+    "sez_oink": {
+      "ids": [
+        720575940613222195,
+        720575940616172033,
+        720575940616851030,
+        720575940626348106,
+        720575940626376600,
+        720575940630670454,
+        720575940630679801,
+        720575940633156799,
+        720575940635613358
+      ],
+      "description": "SEZ cell type oink (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['oink']"
+    },
+    "sez_OinkT": {
+      "ids": [
+        720575940604791217,
+        720575940613433519,
+        720575940622853258,
+        720575940631983464,
+        720575940639826339,
+        720575940640348149
+      ],
+      "description": "SEZ cell type OinkT (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['OinkT']"
+    },
+    "sez_oval": {
+      "ids": [
+        720575940621522352,
+        720575940626085562
+      ],
+      "description": "SEZ cell type oval (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['oval']"
+    },
+    "sez_peacock": {
+      "ids": [
+        720575940612030899,
+        720575940618563664,
+        720575940623687757,
+        720575940631237203
+      ],
+      "description": "SEZ cell type peacock (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['peacock']"
+    },
+    "sez_peahen": {
+      "ids": [
+        720575940613361010,
+        720575940617854676,
+        720575940618118485,
+        720575940626983684
+      ],
+      "description": "SEZ cell type peahen (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['peahen']"
+    },
+    "sez_peafowl": {
+      "ids": [
+        720575940619985243,
+        720575940622284947
+      ],
+      "description": "SEZ cell type peafowl (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['peafowl']"
+    },
+    "sez_phantom": {
+      "ids": [
+        720575940616103218,
+        720575940637763135
+      ],
+      "description": "SEZ cell type phantom (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['phantom']"
+    },
+    "sez_planter": {
+      "ids": [
+        720575940617497437,
+        720575940628129129
+      ],
+      "description": "SEZ cell type planter (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['planter']"
+    },
+    "sez_pleco": {
+      "ids": [
+        720575940611502286,
+        720575940615583647
+      ],
+      "description": "SEZ cell type pleco (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['pleco']"
+    },
+    "sez_pringle": {
+      "ids": [
+        720575940611715813,
+        720575940621218694
+      ],
+      "description": "SEZ cell type pringle (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['pringle']"
+    },
+    "sez_pSG1": {
+      "ids": [
+        720575940610698931,
+        720575940620224532,
+        720575940620943365,
+        720575940621517481,
+        720575940629997050,
+        720575940630757516
+      ],
+      "description": "SEZ cell type pSG1 (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['pSG1']"
+    },
+    "sez_puddle": {
+      "ids": [
+        720575940616848214,
+        720575940627739023
+      ],
+      "description": "SEZ cell type puddle (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['puddle']"
+    },
+    "sez_rattle": {
+      "ids": [
+        720575940630461660,
+        720575940638103349
+      ],
+      "description": "SEZ cell type rattle (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['rattle']"
+    },
+    "sez_rocket": {
+      "ids": [
+        720575940610322040,
+        720575940611783410,
+        720575940613735391,
+        720575940616455483,
+        720575940619196848,
+        720575940619462128,
+        720575940619862720,
+        720575940620916360,
+        720575940620950554,
+        720575940629081175,
+        720575940629977192,
+        720575940635839845,
+        720575940637761213,
+        720575940638604733,
+        720575940638874064,
+        720575940639107573,
+        720575940639621760,
+        720575940643253271
+      ],
+      "description": "SEZ cell type rocket (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['rocket']"
+    },
+    "sez_rose": {
+      "ids": [
+        720575940624101524
+      ],
+      "description": "SEZ cell type rose (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['rose']"
+    },
+    "sez_roundup": {
+      "ids": [
+        720575940607272649,
+        720575940623211725
+      ],
+      "description": "SEZ cell type roundup (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['roundup']"
+    },
+    "sez_ruby": {
+      "ids": [
+        720575940608901897,
+        720575940622168052
+      ],
+      "description": "SEZ cell type ruby (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['ruby']"
+    },
+    "sez_Salivary_MN13": {
+      "ids": [
+        720575940618864725,
+        720575940619455879
+      ],
+      "description": "SEZ cell type Salivary_MN13 (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['Salivary_MN13']"
+    },
+    "sez_seagull": {
+      "ids": [
+        720575940626278974
+      ],
+      "description": "SEZ cell type seagull (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['seagull']"
+    },
+    "sez_shark": {
+      "ids": [
+        720575940607641010,
+        720575940620182181,
+        720575940626770057,
+        720575940635776760
+      ],
+      "description": "SEZ cell type shark (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['shark']"
+    },
+    "sez_sink_sync": {
+      "ids": [
+        720575940622624214,
+        720575940628029180,
+        720575940638001498,
+        720575940647560500
+      ],
+      "description": "SEZ cell type sink_sync (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['sink_sync']"
+    },
+    "sez_snake": {
+      "ids": [
+        720575940625815562,
+        720575940631643532
+      ],
+      "description": "SEZ cell type snake (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['snake']"
+    },
+    "sez_spray": {
+      "ids": [
+        720575940608402012,
+        720575940629210490
+      ],
+      "description": "SEZ cell type spray (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['spray']"
+    },
+    "sez_spirit": {
+      "ids": [
+        720575940613461043,
+        720575940621468404
+      ],
+      "description": "SEZ cell type spirit (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['spirit']"
+    },
+    "sez_sullivan": {
+      "ids": [
+        720575940628590697,
+        720575940638663221
+      ],
+      "description": "SEZ cell type sullivan (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['sullivan']"
+    },
+    "sez_sundrop": {
+      "ids": [
+        720575940607014530,
+        720575940626086842
+      ],
+      "description": "SEZ cell type sundrop (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['sundrop']"
+    },
+    "sez_tentacular": {
+      "ids": [
+        720575940620673985,
+        720575940621399899
+      ],
+      "description": "SEZ cell type tentacular (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['tentacular']"
+    },
+    "sez_TH_VUM": {
+      "ids": [
+        720575940616857174
+      ],
+      "description": "SEZ cell type TH_VUM (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['TH_VUM']"
+    },
+    "sez_tinctoria": {
+      "ids": [
+        720575940618165019,
+        720575940619048827,
+        720575940625875504,
+        720575940630868793
+      ],
+      "description": "SEZ cell type tinctoria (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['tinctoria']"
+    },
+    "sez_tophat": {
+      "ids": [
+        720575940620441024,
+        720575940622541005,
+        720575940638865011,
+        720575940660281217
+      ],
+      "description": "SEZ cell type tophat (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['tophat']"
+    },
+    "sez_TPN4": {
+      "ids": [
+        720575940614238114,
+        720575940634147936
+      ],
+      "description": "SEZ cell type TPN4 (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['TPN4']"
+    },
+    "sez_trident": {
+      "ids": [
+        720575940624163303
+      ],
+      "description": "SEZ cell type trident (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['trident']"
+    },
+    "sez_trogon": {
+      "ids": [
+        720575940631595603
+      ],
+      "description": "SEZ cell type trogon (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['trogon']"
+    },
+    "sez_trumpet": {
+      "ids": [
+        720575940628386295,
+        720575940645056791
+      ],
+      "description": "SEZ cell type trumpet (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['trumpet']"
+    },
+    "sez_tulip": {
+      "ids": [
+        720575940617755220,
+        720575940620061793
+      ],
+      "description": "SEZ cell type tulip (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['tulip']"
+    },
+    "sez_tundra": {
+      "ids": [
+        720575940621538142,
+        720575940621573542
+      ],
+      "description": "SEZ cell type tundra (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['tundra']"
+    },
+    "sez_turner": {
+      "ids": [
+        720575940610956334,
+        720575940629437378
+      ],
+      "description": "SEZ cell type turner (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['turner']"
+    },
+    "sez_twirl": {
+      "ids": [
+        720575940636034661
+      ],
+      "description": "SEZ cell type twirl (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['twirl']"
+    },
+    "sez_usnea": {
+      "ids": [
+        720575940632648612,
+        720575940641366517
+      ],
+      "description": "SEZ cell type usnea (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['usnea']"
+    },
+    "sez_vice": {
+      "ids": [
+        720575940611156978,
+        720575940612879783,
+        720575940616623590,
+        720575940621431884,
+        720575940622392260,
+        720575940623252407
+      ],
+      "description": "SEZ cell type vice (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['vice']"
+    },
+    "sez_wafflecone": {
+      "ids": [
+        720575940624913959,
+        720575940626075517
+      ],
+      "description": "SEZ cell type wafflecone (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['wafflecone']"
+    },
+    "sez_weaver": {
+      "ids": [
+        720575940612023922,
+        720575940612938961,
+        720575940613412002,
+        720575940614728607,
+        720575940616605441,
+        720575940619409135,
+        720575940625384323,
+        720575940628330651,
+        720575940628469508,
+        720575940628546807,
+        720575940629460524,
+        720575940633050524,
+        720575940636887130
+      ],
+      "description": "SEZ cell type weaver (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['weaver']"
+    },
+    "sez_web": {
+      "ids": [
+        720575940622500172,
+        720575940624038663,
+        720575940624897516,
+        720575940627087646,
+        720575940627286088,
+        720575940632722636
+      ],
+      "description": "SEZ cell type web (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['web']"
+    },
+    "sez_whisker": {
+      "ids": [
+        720575940627418387,
+        720575940627429907
+      ],
+      "description": "SEZ cell type whisker (from sez_neurons.pickle)",
+      "upstream_symbol": "sez_neurons.pickle['whisker']"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+# FlyBrain v0 - core runtime requirements
+#
+# These are the ONLY hard requirements for `subset` mode and for `whole-brain` mode
+# on CPU. Verified working on Windows 11 / Python 3.11.7 with the versions pinned
+# in data/metadata/environment.json of a run.
+numpy>=1.24
+pandas>=2.0
+pyarrow>=12.0

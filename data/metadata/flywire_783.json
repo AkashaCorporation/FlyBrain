@@ -1,0 +1,37 @@
+{
+  "dataset_id": "flywire_783",
+  "source": "https://github.com/philshiu/Drosophila_brain_model",
+  "release": "FlyWire public version 783",
+  "retrieved_at": "2026-09-28T18:37:15Z",
+  "neuron_count": 138639,
+  "edge_count": 15091983,
+  "sha256": "4a621918d7ee52a7e915e98f83814356115c0fcf04392ac32d285893521e1097",
+  "files": [
+    {
+      "name": "Completeness_783.csv",
+      "role": "neuron_table",
+      "sha256": "52b0ac6094cd32c546f8d4c341e094376f48f4e791f8db9b166de5dff8199ea4",
+      "size_bytes": 3465987
+    },
+    {
+      "name": "Connectivity_783.parquet",
+      "role": "connectivity_table",
+      "sha256": "efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347",
+      "size_bytes": 100804642
+    }
+  ],
+  "notes": "Newer public release, shipped alongside 630 by the upstream repository. Registered and validated by FlyBrain, but NOT the primary v0 dataset: no published reference output exists for it.",
+  "upstream": {
+    "repository": "https://github.com/philshiu/Drosophila_brain_model",
+    "local_clone": "E:\\HipoCampo\\FlyBrain\\third_party\\Drosophila_brain_model"
+  },
+  "extra": {
+    "synapses_total": 54492922,
+    "excitatory_neurons": 96672,
+    "inhibitory_neurons": 41333,
+    "neurons_unknown_sign": 634,
+    "validation_failures": 0,
+    "validation_warnings": 3,
+    "counts_measured_at": "2026-09-28T18:37:45Z"
+  }
+}

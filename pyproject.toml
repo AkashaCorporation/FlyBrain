@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flybrain"
+version = "0.0.1"
+description = "FlyBrain v0 - executable Drosophila whole-brain connectome simulation on the FlyWire-derived LIF model"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "FlyBrain" }]
+keywords = ["connectome", "drosophila", "flywire", "lif", "neuroscience", "simulation"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Life",
+]
+
+# Deliberately minimal. Optional accelerators live in requirements/gpu.txt and the
+# `gpu` extra. Nothing here is allowed to be a hard requirement for subset mode.
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "pyarrow>=12.0",
+]
+
+[project.optional-dependencies]
+jax = ["jax>=0.4"]
+plot = ["matplotlib>=3.7"]
+dev = ["pytest>=7.4"]
+gpu = [
+    # JAX CUDA wheels are built for Linux only; on native Windows this installs the
+    # CPU build. See docs/ARCHITECTURE.md. Kept as an explicit extra so that the
+    # limitation is visible rather than implicit.
+    "jax[cuda12]>=0.4; sys_platform == 'linux'",
+    "jax>=0.4; sys_platform != 'linux'",
+]
+
+[project.scripts]
+flybrain = "flybrain.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["flybrain*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "slow: tests that need the full dataset or run long simulations",
+]
+
+[tool.flybrain]
+# Documentation-only: consumed by flybrain.config for defaults, not by setuptools.
+primary_dataset = "flywire_630"

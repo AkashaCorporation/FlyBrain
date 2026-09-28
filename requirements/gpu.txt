@@ -1,0 +1,28 @@
+# FlyBrain v0 - optional acceleration stack
+#
+# ---------------------------------------------------------------------------
+# READ THIS BEFORE EXPECTING A GPU
+# ---------------------------------------------------------------------------
+# JAX publishes CUDA-enabled jaxlib wheels for Linux only. On native Windows,
+# `pip install jax` yields a CPU-only build, regardless of the installed NVIDIA
+# driver and CUDA toolkit. This was verified experimentally on the machine used
+# to develop FlyBrain v0 (GTX 1650, driver 591.86, CUDA 13.1):
+#
+#     >>> import jax; jax.default_backend(); jax.devices()
+#     'cpu'
+#     [CpuDevice(id=0)]
+#
+# FlyBrain does not pretend otherwise. The `gpu` extra therefore requests the
+# CUDA build only where it can actually exist (Linux / WSL2), and falls back to
+# the CPU build elsewhere. `flybrain.runtime.backend` reports what is really
+# available at runtime, and never labels a CPU backend as a GPU one.
+#
+# To genuinely run FlyBrain on a GPU from a Windows host, use WSL2 and install
+# the Linux CUDA build inside the WSL2 distribution:
+#
+#     pip install "jax[cuda12]"
+#
+# ---------------------------------------------------------------------------
+
+jax>=0.4                     # CPU build everywhere; enables the `jax` backend
+jax[cuda12]>=0.4; sys_platform == "linux"

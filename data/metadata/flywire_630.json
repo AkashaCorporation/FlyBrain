@@ -1,0 +1,37 @@
+{
+  "dataset_id": "flywire_630",
+  "source": "https://github.com/philshiu/Drosophila_brain_model",
+  "release": "FlyWire 2023_03_23 materialization, completeness threshold 630",
+  "retrieved_at": "2026-09-28T18:37:15Z",
+  "neuron_count": 127400,
+  "edge_count": 14687178,
+  "sha256": "67de1c152ff8d47b8460f1c980052abfe3ed40c6e98870ff8af073a9e12dcf4a",
+  "files": [
+    {
+      "name": "2023_03_23_completeness_630_final.csv",
+      "role": "neuron_table",
+      "sha256": "e6b71e17671a9bdb05f55e4bc6774640a1418cb7a05125e0fc994ad40f9bfdfb",
+      "size_bytes": 3057611
+    },
+    {
+      "name": "2023_03_23_connectivity_630_final.parquet",
+      "role": "connectivity_table",
+      "sha256": "94db8c650533bc36ffa3223f2e62325d5648b8d6bd31c3a4e1c804628c7557b3",
+      "size_bytes": 86630944
+    }
+  ],
+  "notes": "Version used by Shiu et al., Nature 634, 210-219 (2024). A byte-identical copy of the connectivity table is vendored by https://github.com/chaobrain/drosophila_whole_brain_snn_simulation.",
+  "upstream": {
+    "repository": "https://github.com/philshiu/Drosophila_brain_model",
+    "local_clone": "E:\\HipoCampo\\FlyBrain\\third_party\\Drosophila_brain_model"
+  },
+  "extra": {
+    "synapses_total": 52793639,
+    "excitatory_neurons": 86543,
+    "inhibitory_neurons": 40472,
+    "neurons_unknown_sign": 385,
+    "validation_failures": 0,
+    "validation_warnings": 3,
+    "counts_measured_at": "2026-09-28T18:37:30Z"
+  }
+}

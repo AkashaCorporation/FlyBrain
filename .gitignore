@@ -1,0 +1,23 @@
+# ---- FlyBrain: cloned upstream references (never imported, never edited) ----
+third_party/
+
+# ---- staged dataset: large binaries stay out of git; provenance is committed ----
+# data/metadata/*.json IS committed (small, and it is the provenance record).
+data/raw/
+data/processed/
+
+# ---- run artefacts ----
+outputs/
+
+# ---- scratch / probe scripts ----
+_scratch/
+
+# ---- python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
