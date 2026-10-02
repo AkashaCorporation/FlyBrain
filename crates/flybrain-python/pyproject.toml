@@ -1,0 +1,12 @@
+[build-system]
+requires = ["maturin==1.10.2"]
+build-backend = "maturin"
+
+[project]
+name = "flybrain-native"
+version = "0.1.0"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+
+[tool.maturin]
+module-name = "flybrain_native"

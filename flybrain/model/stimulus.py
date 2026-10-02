@@ -176,10 +176,10 @@ class StimulusSampler:
     """Turns a :class:`Stimulus` into per-timestep Poisson event counts.
 
     The RNG is drawn **every** step, including steps outside the stimulus window,
-    and the window is applied as a mask afterwards. That makes the random stream
-    independent of ``start_ms``/``end_ms``: changing the onset time changes which
-    events are used, not which events are generated, so the same stimulus always
-    contributes the same underlying stream.
+    and the window is applied as a mask afterwards. In the historical contract,
+    however, spec_hash includes the window, rate and label: changing those fields
+    changes the RNG seed. This class preserves that behavior for v0 replay.
+    Use InputChannel for explicitly identified, window-independent sensory streams.
     """
 
     def __init__(
@@ -199,8 +199,8 @@ class StimulusSampler:
     def counts(self, t_ms: float) -> np.ndarray:
         """Poisson event count per target neuron for the step starting at ``t_ms``.
 
-        Returns a zero array when the stimulus is inactive, but still advances the
-        RNG so the stream is window-independent.
+        Returns a zero array when inactive, after drawing. This does not undo the
+        legacy seed's dependence on the configured window.
         """
         draws = self.rng.poisson(self.lam, size=self.indices.size).astype(np.float32)
         if not self.stimulus.is_active(t_ms):

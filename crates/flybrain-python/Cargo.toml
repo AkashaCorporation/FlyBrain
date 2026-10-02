@@ -1,0 +1,13 @@
+[package]
+name = "flybrain-python"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[lib]
+name = "flybrain_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+flybrain-core = { path = "../flybrain-core" }
+pyo3 = { version = "=0.27.2", features = ["extension-module"] }

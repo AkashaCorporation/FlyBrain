@@ -37,6 +37,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 import numpy as np
 
 from ..errors import FlyBrainError
+from .inputs import InputChannel
 from .lif import ExactLinearCoefficients, LIFParams
 from .populations import Population, PopulationRegistry
 from .stimulus import Stimulus, StimulusSampler, build_samplers
@@ -115,6 +116,7 @@ class LIFNetwork:
         backend=None,
         seed: int = 0,
         registry: Optional[PopulationRegistry] = None,
+        contract_version: str = "legacy_v0",
     ):
         from ..runtime.backend import get_backend  # local import avoids a cycle
 
@@ -123,6 +125,10 @@ class LIFNetwork:
         self.dt_ms = float(dt_ms)
         self.seed = int(seed)
         self.registry = registry or PopulationRegistry.builtin()
+        if contract_version not in ("legacy_v0", "v1"):
+            raise FlyBrainError(f"unknown network contract {contract_version!r}")
+        self.contract_version = contract_version
+        self._input_channels: Dict[str, InputChannel] = {}
 
         self.params.validate(self.dt_ms)
         self.backend = backend if backend is not None else get_backend("auto")
@@ -206,6 +212,7 @@ class LIFNetwork:
         self._rebuild_samplers()
         self._rebuild_kill_mask()
         self._apply_stimulus_refractory()
+        self.reset_input_rng()
         return self
 
     def _rebuild_kill_mask(self) -> None:
@@ -223,8 +230,9 @@ class LIFNetwork:
 
         Accepts one or more :class:`Stimulus` objects, or a single iterable of them.
         Stimulated neurons get their refractory period set to ``0 ms`` (upstream
-        behaviour). Replacing the stimulus set restores the refractory period of
-        neurons that are no longer targets.
+        behaviour). Contract v1 restores the refractory period of old targets;
+        legacy_v0 preserves the historical sticky-zero transition until clear/reset.
+        This scheduled interface rebuilds RNGs. Use set_input_rates for sensors.
         """
         flat: List[Stimulus] = []
         for s in stimuli:
@@ -248,12 +256,45 @@ class LIFNetwork:
 
     def _apply_stimulus_refractory(self) -> None:
         """Set the refractory period of stimulated neurons to 0 ms (upstream behaviour)."""
-        base = np.asarray(self.tau_ref, dtype=np.float32).copy()
+        if self.contract_version == "v1":
+            base = np.full(self.n, self.params.refractory_ms, dtype=np.float32)
+        else:
+            base = np.asarray(self.tau_ref, dtype=np.float32).copy()
         if self._stim_targets.size:
             base[self._stim_targets] = 0.0
         else:
             base[:] = self.params.refractory_ms
         self.tau_ref = self.backend.asarray(base, dtype=self.dtype)
+
+    def declare_input_channel(self, channel_id, neuron_ids, *, experiment_id,
+                              agent_id, rate_hz, gain_mv, start_ms=0.0,
+                              end_ms=float("inf"), label=""):
+        """Declare v1 conductance input. Target order is canonical and immutable."""
+        if self.contract_version != "v1":
+            raise FlyBrainError("continuous sensory channels require contract_version='v1'")
+        if channel_id in self._input_channels:
+            raise FlyBrainError(f"input channel already declared: {channel_id!r}")
+        ids = tuple(sorted(set(int(i) for i in neuron_ids)))
+        if not ids:
+            raise FlyBrainError("input channel needs at least one neuron")
+        channel = InputChannel(channel_id, ids, self.connectome.indices_of(ids),
+                               experiment_id=experiment_id, agent_id=agent_id,
+                               base_seed=self.seed, dt_ms=self.dt_ms,
+                               rate_hz=rate_hz, gain_mv=gain_mv,
+                               start_ms=start_ms, end_ms=end_ms, label=label)
+        self._input_channels[channel_id] = channel
+        return channel
+
+    def set_input_rates(self, channel_id, rates_hz):
+        """Update a channel's rates, without drawing or rebuilding its RNG."""
+        self._input_channels[channel_id].set_rates(rates_hz)
+
+    def reset_input_rng(self, channel_id=None):
+        """Reset only sensory RNGs to this network's seed; preserve physiology/rates."""
+        channels = (self._input_channels.values() if channel_id is None
+                    else [self._input_channels[channel_id]])
+        for channel in channels:
+            channel.reset_rng(self.seed)
 
     def silence(
         self,
@@ -361,6 +402,12 @@ class LIFNetwork:
             contrib = self.weights * pre_spk[self.pre]
             self.g = self.g + bk.scatter_add(self.n, self.post, contrib, dtype=self.dtype)
 
+        # v1 sensory conductance, after recurrence, in stable channel order.
+        for key in sorted(self._input_channels):
+            channel = self._input_channels[key]
+            contrib = bk.asarray(channel.counts(t_ms), dtype=self.dtype) * bk.asarray(channel.gain_mv, dtype=self.dtype)
+            self.g = bk.add_at(self.g, bk.asarray(channel.indices), contrib)
+
         self.spike_count = self.spike_count + spike_f
         self.step_index += 1
         self.last_spike = spike_f
@@ -445,6 +492,8 @@ class LIFNetwork:
 
     def describe(self) -> Dict[str, Any]:
         return {
+            "contract_version": self.contract_version,
+            "input_channels": [self._input_channels[k].to_dict() for k in sorted(self._input_channels)],
             "backend": self.backend.name,
             "is_gpu": self.backend.is_gpu,
             "dtype": str(self.dtype),
