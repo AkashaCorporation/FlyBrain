@@ -23,9 +23,19 @@ def policy_fingerprint(policies):
     return hashlib.sha256(pickle.dumps(payload)).hexdigest()
 
 
-def evaluate(policies, *, seed=907, repeats=64):
+def evaluate(policies, *, seed=907, repeats=64, message_fn=None):
+    """Exact expected returns for one frozen-policy paired replay.
+
+    `message_fn(cue) -> int in {0,1,2}` produces the message from outside the
+    policy pair, exactly as train(message_fn=...) did. It must be supplied
+    whenever training used one: the replay otherwise re-emits with the sender's
+    own policy, which in a circuit-driven run is frozen and untrained, and the
+    evaluation would then score a channel that training never used.
+    """
     if set(policies) != set(HiddenChoice.agents) or not 1 <= repeats <= 4096:
         raise ValueError("two individual policies and 1..4096 repeats required")
+    if message_fn is not None and not callable(message_fn):
+        raise TypeError("message_fn must be callable")
     frozen = policy_fingerprint(policies)
     world_rng, intervention_rng = [
         np.random.default_rng(s) for s in np.random.SeedSequence(seed).spawn(2)
@@ -58,10 +68,20 @@ def evaluate(policies, *, seed=907, repeats=64):
     for target, sender, options in conditions:
         obs = env.reset_for_evaluation(target, sender, options)
         before = env.snapshot()
-        sender_copy = copy.deepcopy(evaluation_agents[env.sender])
-        emitted, _ = sender_copy.act(obs[env.sender])
-        # Advance only evaluation copies; training individuals remain untouched.
-        evaluation_agents[env.sender] = sender_copy
+        if message_fn is None:
+            sender_copy = copy.deepcopy(evaluation_agents[env.sender])
+            emitted, _ = sender_copy.act(obs[env.sender])
+            # Advance only evaluation copies; training individuals remain untouched.
+            evaluation_agents[env.sender] = sender_copy
+        else:
+            # The message comes from outside the pair of policies, exactly as it
+            # did during training when train(message_fn=...) was used. Without this
+            # the replay re-emits with the SENDER'S POLICY, which in a
+            # circuit-driven run is frozen and untrained, so the evaluation would
+            # score a channel that training never used.
+            emitted = message_fn(obs[env.sender].private_cue)
+            if emitted not in (0, 1, 2):
+                raise ValueError(f"message_fn returned {emitted!r}, not 0, 1 or 2")
         receiver_before = copy.deepcopy(evaluation_agents[env.receiver])
         choices = {}
         probs = {}

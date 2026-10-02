@@ -66,9 +66,20 @@ def make_individuals(seed):
     return HiddenChoice(values[0]), agents, values
 
 
-def train(env, policies, *, episodes=12000, max_seconds=30, curve_every=1000):
+def train(env, policies, *, episodes=12000, max_seconds=30, curve_every=1000,
+          message_fn=None):
+    """Train the receiver, and the sender too unless the message is external.
+
+    `message_fn(cue) -> int in {0,1,2}` replaces the sender's own choice of
+    message. When it is given the sender is NOT updated, because it has no agency:
+    the cue reaches the channel through something other than its policy. Leaving
+    the sender learning in that case would credit it with an action it did not
+    choose. Only the receiver learns.
+    """
     if not 0 < episodes <= 50000 or not 0 < max_seconds <= 600 or curve_every <= 0:
         raise ValueError("invalid pilot budget")
+    if message_fn is not None and not callable(message_fn):
+        raise TypeError("message_fn must be callable")
     start = time.perf_counter()
     curve = []
     window = []
@@ -80,13 +91,19 @@ def train(env, policies, *, episodes=12000, max_seconds=30, curve_every=1000):
         sender = policies[env.sender]
         receiver = policies[env.receiver]
         sender_obs = obs[env.sender]
-        message, _ = sender.act(sender_obs)
+        if message_fn is None:
+            message, _ = sender.act(sender_obs)
+        else:
+            message = message_fn(sender_obs.private_cue)
+            if message not in (0, 1, 2):
+                raise ValueError(f"message_fn returned {message!r}, not 0, 1 or 2")
         obs, _, _ = env.step({env.sender: message})
         receiver_obs = obs[env.receiver]
         action, _ = receiver.act(receiver_obs)
         _, reward, done = env.step({env.receiver: action})
         assert done
-        sender.learn(sender_obs, message, reward[env.sender])
+        if message_fn is None:
+            sender.learn(sender_obs, message, reward[env.sender])
         receiver.learn(receiver_obs, action, reward[env.receiver])
         window.append(reward[env.receiver])
         completed = episode + 1

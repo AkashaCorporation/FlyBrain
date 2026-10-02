@@ -1,0 +1,30 @@
+# Selo do pre-registro C2b
+
+C2b nao foi executado quando este selo foi gravado.
+
+| campo | valor |
+|---|---|
+| arquivo | docs/PREREGISTRATION_C2B.md |
+| revisao | 1 |
+| sha256 | 175d2ebf03ddb241524cd986b519b9f3399be6cd088c59e9c45aa39a7053abde |
+| bytes | 6,858 |
+| gravado em (UTC) | 2026-10-02T13:51:48.062037+00:00 |
+| N declarado | 16 conjuntos de sementes |
+| W | 160, herdado da calibracao de C2a, nao recalibrado aqui |
+| mouldes | construidos na condicao A, aplicados sem alteracao em B e C |
+| desfecho primario | ganho sobre reamostragem, A - B |
+| status | PREPARADO, NAO EXECUTADO |
+
+O que existe no momento do selo:
+- C2a executado e POSITIVO (docs/NEURAL_C2A_REPORT.md)
+- o controle por grau preservado, 20 testes
+- o contrato de leitura por neuronio, 4 testes
+- train() aceita message_fn e congela o remetente, 5 testes novos
+
+O que NAO existe no momento do selo:
+- scripts/run_neural_c2b.py
+- qualquer simulacao de C2b
+- qualquer resultado de C2b
+
+Se o sha256 deixar de bater depois de C2b rodar, o registro foi alterado depois
+de ver os dados. Declarar no relatorio, nao corrigir em silencio.
