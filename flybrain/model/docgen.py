@@ -17,7 +17,7 @@ from .lif import PARAMETER_PROVENANCE
 BEGIN = "<!-- BEGIN GENERATED PARAMETER TABLE -->"
 END = "<!-- END GENERATED PARAMETER TABLE -->"
 
-COLUMNS = ("FlyBrain field", "value", "unit", "source", "reason", "confidence")
+COLUMNS = ("MelanoGraph field", "value", "unit", "source", "reason", "confidence")
 
 
 def render_parameter_table() -> str:
@@ -63,9 +63,9 @@ def render_parameter_table() -> str:
 
 
 def render_mapped_section() -> str:
-    """Upstream key -> FlyBrain field, so the mapping is never guessed."""
+    """Upstream key -> MelanoGraph field, so the mapping is never guessed."""
     lines = [
-        "| upstream key (``model.py``) | FlyBrain field | value |",
+        "| upstream key (``model.py``) | MelanoGraph field | value |",
         "|---|---|---|",
     ]
     for field, info in PARAMETER_PROVENANCE.items():

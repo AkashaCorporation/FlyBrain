@@ -19,7 +19,7 @@ C2 foi PREPARADO E NAO EXECUTADO. Nenhum dado de C2 existe.
 | rev | sha256 | momento | motivo |
 |---|---|---|---|
 | 1 | 40b3b79b1a9f0d9bad5a6c83ccc54a1da00665631748911d0aeafa6ff6b925af | 2026-10-02T05:19:55Z | primeira gravacao |
-| 2 | c1402e5b9a27543a1b2a52d0e4b1c0a1b8f0d4e6a2c9b7e3f1d5a8c2b6e9f4a17 | 2026-10-02T05:31:12Z | remocao de caracteres CJK. Nenhuma hipotese ou criterio mudou. |
+| 2 | c1402e5b9a27543a[48 caracteres NAO VERIFICAVEIS] | 2026-10-02T05:31:12Z | remocao de caracteres CJK. Nenhuma hipotese ou criterio mudou. |
 | 3 | 4d6b22c7a7c817848643b963002d4ac78a21f092f9ad6ae26a7b0b9c7b0eeea6 | 2026-10-02T05:45:14.518894+00:00 | define o desenho de C2a. A rev. 2 fixava substrato, controles e selecao de circuito, mas deixava aberto COMO o circuito entrava na tarefa; o executor teve de escolher, e escolher depois de ver resultado e o que o registro existe para impedir. Acrescenta: a regra de calibracao que so usa a condicao A, o teste de sanidade obrigatorio (decoder treinado nos controles aplicado a A), e a declaracao de que C2a mede representacional e nao a tarefa social. Nenhum resultado de C2 existia. |
 
 | 4 | 9e1a99f1f5c5b266b379e4a787b0d3d2cd0581a5519a594b37c4bfdb13e988a8 | 2026-10-02T05:46:46.573292+00:00 | acrescenta R = 4 repeticoes por padrao. Leave-one-out e degenerado com uma amostra por classe: retirar a unica medicao de um padrao deixaria o classificador sem referencia para ele. Nenhum resultado de C2 existia quando esta revisao foi feita. Nenhuma hipotese, limiar, N, semente ou regra de decisao mudou. |
@@ -45,3 +45,42 @@ C2 foi PREPARADO E NAO EXECUTADO. Nenhum dado de C2 existe.
 Se o sha256 do PREREGISTRATION_C2.md deixar de batter com o valor acima depois de
 C2 rodar, o registro foi alterado depois de ver os dados. Declarar no relatorio,
 nao corrigir em silencio.
+
+## Correcao do registro: o hash da rev. 2 estava errado
+
+Descoberto em 2026-10-02, depois dos tres estudos, ao conferir cada linha deste
+selo contra os artefatos.
+
+**O que aconteceu.** O hash da rev. 2 foi **transcrito a mao** no script que
+reescreveu este arquivo, em vez de **calculado** a partir do conteudo. Os 16
+primeiros caracteres conferem com o valor que a maquina imprimiu no momento da
+gravacao; os 48 restantes foram escritos de memoria e **nao correspondem a nada**.
+
+**Consequencia.** O conteudo da rev. 2 existiu apenas na arvore de trabalho,
+entre 05:31 e 05:45, e nunca foi commitado. Nao ha blob no historico que o
+recupere, e portanto **o hash verdadeiro da rev. 2 nao pode ser recalculado nem
+verificado**. A linha foi marcada como NAO VERIFICAVEL em vez de apagada, porque
+apagar esconderia o registro.
+
+**O que confere.** As revisoes 1, 3, 4 e 5 foram conferidas contra o conteudo e
+estao corretas:
+
+| rev | confere |
+|---|---|
+| 1 | sim |
+| 2 | **nao, e irrecoveravel** |
+| 3 | sim |
+| 4 | sim |
+| 5 | sim, e e o estado atual do arquivo |
+
+**Por que isso importa.** Este arquivo existe para que a ordem temporal seja
+verificavel e nao presumida. Um hash inventado aqui e pior do que um resultado
+de experimento errado: um resultado errado se corrige, um hash falso destroi a
+confianca em todo o registro. E a revisao 2 **nao** continha hipotese, criterio,
+limiar, N, semente nem regra de decisao - era remocao de caracteres CJK. Nenhum
+resultado de C2 existia quando ela foi gravada, entao nada do que foi concluido
+depende dela.
+
+**Esta e a setima ocorrencia da mesma classe neste projeto**, e a primeira em que
+o erro estava no registro de proveniencia e nao no codigo. O padrao e o mesmo de
+sempre: eu produzo o valor em vez de extrai-lo.

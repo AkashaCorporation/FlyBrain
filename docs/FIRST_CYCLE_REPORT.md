@@ -1,4 +1,4 @@
-# Primeiro ciclo FlyBrain — entrega verificada em 29/09/2026
+# Primeiro ciclo MelanoGraph — entrega verificada em 29/09/2026
 
 O primeiro ciclo A–C foi implementado e validado, com piloto tabular D adicional.
 A referência permanece disponível, o núcleo Rust foi compilado e comparado com
@@ -13,7 +13,7 @@ O arquivo histórico `ESTADO_ATUAL.md` deve ser lido junto desta atualização.
 
 ## Evidência principal
 
-Todos os caminhos abaixo são relativos à raiz FlyBrain.
+Todos os caminhos abaixo são relativos à raiz MelanoGraph.
 
 | Evidência | Resultado atual | Artefato |
 |---|---|---|

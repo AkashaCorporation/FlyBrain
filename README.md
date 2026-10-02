@@ -1,13 +1,40 @@
-# FlyBrain v0
+<p align="center">
+  <img src="docs/images/MelanoGraph.png" alt="MelanoGraph" width="180">
+</p>
+
+# MelanoGraph
 
 An executable, reproducible simulation substrate for the *Drosophila* whole-brain
-connectome.
+connectome, and a preregistered programme asking what circuit organisation adds to
+social learning.
 
-FlyBrain loads the FlyWire-derived connectivity published with the Shiu et al. (2024)
+MelanoGraph loads the FlyWire-derived connectivity published with the Shiu et al. (2024)
 Drosophila brain model, runs a leaky integrate-and-fire network over it, accepts
 controlled sensory stimulation, supports causal silencing, records the resulting
 activity, and keeps a full provenance record. It is a substrate for experiments — not
 a mind.
+
+> **Naming.** The project is **MelanoGraph**. The Python package, the CLI entry point
+> and the compiled Rust extension are still called `flybrain`, because renaming 114
+> import sites and a PyO3 module is a mechanical change with no scientific value and
+> real breakage risk. The GitHub repository is still `FlyBrain` for the same reason.
+> Nothing user-facing depends on the old name.
+
+## The programme, in three pre-registered steps
+
+| | question | answer |
+|---|---|---|
+| **C1** | can a tabular agent learn a communication channel? | yes — gain 0.4881, 95 % CI [0.4874, 0.4887], 64/64 seeds |
+| **C2a** | how much cue information reaches the output of the **real** circuit? | more than any rewiring — A−B = +0.2695, CI [0.2129, 0.3223] |
+| **C2b** | does the real wiring **carry** the message in a social task? | yes — A−B = +0.4941, CI [0.4938, 0.4944] |
+
+Each step was preregistered and sealed by SHA-256 **before** it ran, and the run
+refuses to start if the document no longer matches its seal.
+[`docs/RESUMO_UM_PAGINA.md`](docs/RESUMO_UM_PAGINA.md) is the one-page summary.
+
+---
+
+## The substrate, demonstrated
 
 ```
 Stimulate the 21 labelled sugar-sensing gustatory receptor neurons at 100 Hz for 1 s
@@ -22,25 +49,32 @@ Every number traceable to a dataset SHA-256, a git revision, and a seed
 ```
 
 The published reference (the authors' own output, 30 trials) gives 404 active neurons
-and 67.0 / 48.6 Hz for MN9. FlyBrain's single-trial whole-brain run agrees to within
+and 67.0 / 48.6 Hz for MN9. The single-trial whole-brain run agrees to within
 7 % on the active-neuron count and on MN9-right, and is 21 % high on MN9-left. That is
 **partial** agreement, not a reproduction, and
 [`docs/STATUS.md`](docs/STATUS.md) says so in detail rather than rounding it up.
 
 ---
 
-## What v0 is, and is not
+## What this is, and is not
 
 **Is:** a validated connectome loader, a verified LIF implementation with the
 published constants, sparse whole-brain execution, subset execution for CPU,
-controlled stimulation, silencing, selective recording, plots, a command console, four
-packaged experiments, and a test suite that checks the physics rather than the code's
-own output.
+controlled stimulation, silencing, selective recording, plots, a command console,
+packaged experiments, a Rust kernel validated **bit-identically** against the NumPy
+reference, a degree-preserving rewiring control that preserves degree, weight and
+excitation/inhibition balance, and a test suite that checks the physics rather than
+the code's own output.
 
 **Is not:** a language model, an agent, a claims about consciousness, or a claim that
-simulated activity equals biological activity. Explicitly out of scope for v0: LLM,
-JEV, natural-language interface, reinforcement learning, decoder, robotic body. See
-[`docs/SCIENTIFIC_BOUNDARIES.md`](docs/SCIENTIFIC_BOUNDARIES.md).
+simulated activity equals biological activity. Explicitly out of scope: LLM,
+JEV, natural-language interface, reinforcement learning, decoder, robotic body.
+See [`docs/SCIENTIFIC_BOUNDARIES.md`](docs/SCIENTIFIC_BOUNDARIES.md).
+
+**Not neurobiology.** No result here is a claim about how a real fly behaves. The
+circuit used in C2a and C2b is 10 201 of the 138 639 neurons of FlyWire v783 — two hops
+from a gustatory anchor — and saying "the connectome beats a random graph" from a
+subgraph would extrapolate further than these data allow.
 
 ---
 
@@ -63,7 +97,7 @@ subset mode, and nothing downloads anything at run time.
 ### Get the data
 
 The dataset is FlyWire-derived, already preprocessed and published by the upstream
-authors. FlyBrain does not download raw electron-microscopy volumes and never needs
+authors. MelanoGraph does not download raw electron-microscopy volumes and never needs
 to.
 
 ```bash
@@ -74,7 +108,7 @@ flybrain datasets --stage all      # copies both versions into data/raw and vali
 ```
 
 Two versions ship in that repository: `flywire_630` (127 400 neurons — the version the
-paper used, and FlyBrain's primary) and `flywire_783` (138 639 neurons — registered and
+paper used, and MelanoGraph's primary) and `flywire_783` (138 639 neurons — registered and
 validated, not primary). Details and hashes:
 [`docs/DATA_PROVENANCE.md`](docs/DATA_PROVENANCE.md).
 
@@ -162,7 +196,7 @@ measurement, the reproducibility check, and the identified bottleneck.
 flybrain run --mode whole-brain --duration-ms 1000 --stimulus sugar_grn --max-minutes 120
 ```
 
-**If whole-brain cannot run safely, FlyBrain refuses rather than quietly shrinking.**
+**If whole-brain cannot run safely, MelanoGraph refuses rather than quietly shrinking.**
 It estimates the memory requirement by component, compares it against 60 % of
 *available* (not total) RAM, and — for the runtime gate — against a per-step cost it
 measures by actually stepping the assembled network. It then prints the estimate,
@@ -267,7 +301,7 @@ bit-identical spike counts.
 * A single presynaptic spike needs ≈162 synapses on one target to cross threshold, so
   downstream responses require convergent input.
 * JAX has no CUDA wheels for native Windows, so a GPU on a Windows host is not usable
-  from this process. FlyBrain reports this instead of printing "CUDA"
+  from this process. MelanoGraph reports this instead of printing "CUDA"
   ([`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) §4).
 
 ---

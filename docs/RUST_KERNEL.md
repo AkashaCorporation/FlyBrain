@@ -61,11 +61,11 @@ cinco blocos de 2.000 passos por regime, mediana e p95, memória, spikes e arest
 
 ## Build local reproduzível
 
-Na raiz FlyBrain, PowerShell, usando o toolchain já instalado:
+Na raiz MelanoGraph, PowerShell, usando o toolchain já instalado:
 
 ```powershell
 $env:PATH = 'C:\Users\Mazum\.cargo\bin;' + $env:PATH
-$env:PYO3_PYTHON = 'E:\HipoCampo\FlyBrain\.venv\Scripts\python.exe'
+$env:PYO3_PYTHON = 'E:\HipoCampo\MelanoGraph\.venv\Scripts\python.exe'
 & .\.venv\Scripts\python.exe -m pip install maturin==1.10.2
 cargo test --workspace --locked
 & .\.venv\Scripts\python.exe -m maturin build --manifest-path crates/flybrain-python/Cargo.toml --interpreter $env:PYO3_PYTHON --release --locked --out outputs/local-wheels

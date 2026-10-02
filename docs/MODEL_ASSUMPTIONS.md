@@ -1,10 +1,10 @@
 # MODEL_ASSUMPTIONS
 
 **Status:** complete for v0
-**Scope:** every number and every modelling choice that determines FlyBrain's
+**Scope:** every number and every modelling choice that determines MelanoGraph's
 simulated activity, with its source and a confidence label.
 
-FlyBrain does not claim to be a faithful digital copy of a fly. It implements one
+MelanoGraph does not claim to be a faithful digital copy of a fly. It implements one
 specific, published, deliberately simplified model and says exactly which parts are
 data and which are assumptions. The task prompt that commissioned this work listed
 six parameter values; those values were treated as *claims to verify*, not as
@@ -39,7 +39,7 @@ interchangeable.
 ### Integration scheme
 
 Upstream runs Brian 2 with `method='linear'`. Both ODEs are linear with constant
-coefficients, so `linear` means "solve the system exactly over the step". FlyBrain
+coefficients, so `linear` means "solve the system exactly over the step". MelanoGraph
 implements the same exact solution rather than an Euler approximation:
 
 With `x = (v, g)`, the system is `dx/dt = A x + b` for
@@ -79,7 +79,7 @@ from ~41 to ~162, which changes whether a network looks connected or not.
 ### Sub-step ordering
 
 Brian 2 runs its objects in the order state-updater → thresholder → resetter →
-synapses, and `PoissonInput` defaults to `when='synapses'`. FlyBrain therefore runs,
+synapses, and `PoissonInput` defaults to `when='synapses'`. MelanoGraph therefore runs,
 within each `dt`:
 
 1. integrate exactly, skipping refractory neurons;
@@ -98,7 +98,7 @@ Thresholder ANDs its condition with `not_refractory`, so a neuron held above
 threshold still cannot fire inside its refractory window. Without the gate, a
 suprathreshold neuron fires every single step and the refractory period silently
 stops existing. The chaobrain JAX port does not gate it
-(`docs/UPSTREAM_AUDIT.md` §4.1), so this is a point where FlyBrain follows Brian 2
+(`docs/UPSTREAM_AUDIT.md` §4.1), so this is a point where MelanoGraph follows Brian 2
 and diverges from that port.
 
 ### Refractoriness
@@ -116,7 +116,7 @@ Incoming synaptic events are still applied to `g` during refractoriness, because
 
 `v_reset = v_rest = -52 mV`. There is no hyperpolarising after-potential. Upstream's
 reset string also assigns `w = 0`, but `w` is not a variable in this model — a
-harmless leftover from a Brian 2 template. FlyBrain does not invent a `w`.
+harmless leftover from a Brian 2 template. MelanoGraph does not invent a `w`.
 
 ---
 
@@ -153,7 +153,7 @@ Upstream (`model.py::poi`) creates, per stimulated neuron, a
 `PoissonInput(target=neu[i], target_var='v', N=1, rate=r_poi, weight=w_syn*f_poi)`
 and sets that neuron's refractory period to `0 ms`.
 
-Consequences FlyBrain reproduces:
+Consequences MelanoGraph reproduces:
 
 * events are **Poisson**, with per-step event count `Poisson(rate × dt)` per target
   neuron (0.015 at 150 Hz, dt = 0.1 ms) — `r_poi` is a rate, not a per-step
@@ -166,7 +166,7 @@ Consequences FlyBrain reproduces:
   steps (verified in `tests/test_model_network.py`).
 
 `f_poi = 250` is a free parameter justified upstream only by the comment "250 is
-sufficient to cause spiking". FlyBrain gives it no independent justification.
+sufficient to cause spiking". MelanoGraph gives it no independent justification.
 
 ---
 
@@ -185,7 +185,7 @@ Consequences, both confirmed:
 * it stops influencing other neurons, which is the causal content of the
   intervention.
 
-FlyBrain implements this by multiplying the delayed presynaptic spike vector by a
+MelanoGraph implements this by multiplying the delayed presynaptic spike vector by a
 per-neuron kill mask, which is algebraically identical to zeroing the outgoing
 weights and O(N) rather than O(E).
 
@@ -212,7 +212,7 @@ Every value below is checked against the code by `tests/test_docs.py`.
 * **derived** — arithmetic on other quantities.
 
 <!-- BEGIN GENERATED PARAMETER TABLE -->
-| FlyBrain field | value | unit | source | reason | confidence |
+| MelanoGraph field | value | unit | source | reason | confidence |
 |---|---|---|---|---|---|
 | `v_rest_mv` | -52.0 | mV | upstream model.py default_params; comment cites Kakaria & de Bivort 2017, https://doi.org/10.3389/fnbeh.2017.00008 | resting potential of the model neuron | cited |
 | `v_reset_mv` | -52.0 | mV | upstream model.py default_params (`eq_rst`) | post-spike reset; upstream sets it equal to rest (no hyperpolarising reset) | free |
@@ -232,7 +232,7 @@ Every value below is checked against the code by `tests/test_docs.py`.
 Because the two projects name the same quantities differently, the mapping is
 recorded so it can never be inferred wrongly:
 
-| upstream key (`model.py`) | FlyBrain field | value |
+| upstream key (`model.py`) | MelanoGraph field | value |
 |---|---|---|
 | `v_0` | `v_rest_mv` | -52.0 |
 | `v_rst` | `v_reset_mv` | -52.0 |
@@ -251,28 +251,28 @@ recorded so it can never be inferred wrongly:
 `w_syn` and `f_poi` are the two numbers that set how excitable the network is, and
 neither is derived from a measurement. `w_syn` is labelled a free parameter in the
 source, and `f_poi` is justified only by "250 is sufficient to cause spiking". Every
-absolute firing rate FlyBrain reports inherits that uncertainty. This is the single
+absolute firing rate MelanoGraph reports inherits that uncertainty. This is the single
 most important caveat in this document.
 
 ---
 
 ## 7. Deliberate deviations from the two upstream implementations
 
-| aspect | original (Brian 2) | chaobrain (JAX) | FlyBrain | why |
+| aspect | original (Brian 2) | chaobrain (JAX) | MelanoGraph | why |
 |---|---|---|---|---|
 | integration | exact linear | sequential exponential Euler | **exact linear** | matches the implementation that produced the paper |
 | sub-step order | integrate → threshold → reset → synapses | `v` integrated with old `g`, then `g`, then input | **Brian 2 order** | documented in §1 |
 | refractory gates the threshold | yes | no | **yes** | §1; a clamped neuron must not fire through its refractory window |
-| spike nonlinearity | hard `v > v_th` | `ReluGrad` surrogate | **hard** | forward value is identical; the surrogate only exists for gradients, and FlyBrain v0 has no gradients |
+| spike nonlinearity | hard `v > v_th` | `ReluGrad` surrogate | **hard** | forward value is identical; the surrogate only exists for gradients, and MelanoGraph v0 has no gradients |
 | silencing | zero outgoing weights | presynaptic kill mask | **kill mask** | algebraically identical, cheaper |
 | stimulation | `PoissonInput` on `v` | `poisson_input` on `v` | **Poisson draws on `v`** | same semantics |
 | stimulated refractory | 0 ms | 0 ms (comment says 0.5 ms) | **0 ms** | code, not comment |
 | RNG | Brian 2's `PoissonInput` | brainstate's RNG | **NumPy PCG64, per-stimulus seed** | reproducible and order-independent |
 
-FlyBrain is therefore expected to agree with the published *qualitative* behaviour
+MelanoGraph is therefore expected to agree with the published *qualitative* behaviour
 and **not** to reproduce the published numbers bit-for-bit. The differences that
 matter most are the RNG (different Poisson realisations) and the trial count
-(published runs used 30 trials; FlyBrain defaults to 1). See
+(published runs used 30 trials; MelanoGraph defaults to 1). See
 [`STATUS.md`](STATUS.md) for the measured comparison.
 
 ---

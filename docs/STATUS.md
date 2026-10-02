@@ -1,6 +1,6 @@
 # STATUS
 
-**FlyBrain v0** — status of every requirement, with the evidence that establishes it.
+**MelanoGraph v0** — status of every requirement, with the evidence that establishes it.
 Updated 2026-09-28.
 
 Legend: **DONE** · **PARTIAL** · **BLOCKED** · **NOT STARTED**.
@@ -13,7 +13,7 @@ artefact or command that produced the evidence.
 
 | # | Requirement | Status | Evidence |
 |---|---|---|---|
-| 1 | project installs from scratch | **DONE** | `pip install -e .` into a clean venv on Python 3.11.7; `flybrain --version` → `FlyBrain 0.0.1`. Only NumPy/pandas/pyarrow are hard requirements. |
+| 1 | project installs from scratch | **DONE** | `pip install -e .` into a clean venv on Python 3.11.7; `flybrain --version` → `MelanoGraph 0.0.1`. Only NumPy/pandas/pyarrow are hard requirements. |
 | 2 | FlyWire-derived connectome data loads | **DONE** | `flybrain datasets --stage all` stages and validates both versions. `outputs/dataset_report.json`. Load path: parquet → int32/int16 arrays, 14 687 178 edges; 0.55 s from the processed cache, 1.5 s cold. |
 | 3 | neuron IDs are preserved | **DONE** | `Connectome.flywire_ids` is the neuron table index verbatim. Proven directly: `flybrain datasets --report flywire_630` checks every edge's `Presynaptic_ID`/`Postsynaptic_ID` against `flywire_ids[index]` and reports **29 374 356 endpoints checked, 0 mismatches**. Subsetting preserves IDs (`test_real_dataset_subset_of_the_sugar_grns`), and orphan neurons are *kept* in the index space (385 with no outgoing edge) so IDs stay stable (`test_real_dataset_orphans_are_kept_in_the_index_space`). |
 | 4 | synaptic connectivity is represented correctly | **DONE** | CSR `indptr`/`indices` verified against a manual count (`test_csr_indptr_consistent_with_out_degree`); signed counts verified present in both directions; duplicate edge pairs = 0; self-loops = 0. Never densified — a dense matrix would need **64.9 GB** (`estimate_requirements`). |
@@ -173,7 +173,7 @@ The published reference is the authors' own `sugarR_100Hz.parquet` (30 trials,
 sugar GRNs driven at 100 Hz). The comparison is **per neuron**, because that is the
 form the published figures take.
 
-| | published | FlyBrain whole-brain | difference |
+| | published | MelanoGraph whole-brain | difference |
 |---|---|---|---|
 | sugar GRN rate | 98.8 Hz (median) | 105.6 Hz | +6.9 % |
 | active neurons | 404 | 376 | −6.9 % |
@@ -182,7 +182,7 @@ form the published figures take.
 | MN9 two-neuron mean | 57.83 Hz | 66.00 Hz | +14.1 % |
 
 > **Correction.** An earlier revision of this document claimed MN9 agreed to 1.5 %.
-> That was a **like-for-unlike comparison**: it set FlyBrain's mean over *both* MN9
+> That was a **like-for-unlike comparison**: it set MelanoGraph's mean over *both* MN9
 > neurons against the published value for the *left* neuron alone. The correct
 > per-neuron comparison is the table above. An independent audit caught it; the
 > experiment now reports per-neuron rates and refuses the population mean as a
@@ -271,7 +271,7 @@ the first item of the next milestone.
    doubles the scatter traffic and is the single biggest cost in the step. It is the
    honest NumPy expression of the semantics; a hand-written kernel would not need it.
 3. **Single-threaded.** No parallelism across neurons or trials. `--trials` runs
-   serially. The upstream model used `joblib` over CPU cores; FlyBrain does not.
+   serially. The upstream model used `joblib` over CPU cores; MelanoGraph does not.
 4. **No GPU path was exercised.** The `jax` backend was validated for correctness on
    CPU only.
 5. **Subset selection is a k-hop neighbourhood, not a principled circuit extraction.**

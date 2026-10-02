@@ -2,7 +2,7 @@
 
 **Status:** complete for v0
 
-Nothing in FlyBrain is downloaded at run time. The two dataset files are staged from
+Nothing in MelanoGraph is downloaded at run time. The two dataset files are staged from
 a local clone of the upstream repository, hashed, validated, and only then simulated
 on. This document records exactly what those files are, where they came from, and what
 their numbers are.
@@ -14,14 +14,14 @@ their numbers are.
 ```
 external FlyWire data
         ↓   (already preprocessed and published by the upstream authors —
-            FlyBrain performs no EM processing and no CAVE query)
+            MelanoGraph performs no EM processing and no CAVE query)
 data/raw/<dataset_id>/               staged copy, byte-identical to upstream
         ↓   SHA-256 per file, recorded in a DatasetCard
 data/metadata/<dataset_id>.json      committed provenance record
         ↓   parquet -> compact arrays, sorted by presynaptic index
 data/processed/<dataset_id>/connectome.npz   derived cache, hash-linked to the raw files
         ↓
-FlyBrain simulation
+MelanoGraph simulation
 ```
 
 `data/raw/` and `data/processed/` are gitignored (they are ~90 MB and ~90 MB
@@ -78,7 +78,7 @@ comparison is possible.
 | excitatory / inhibitory presynaptic neurons | 96 672 / 41 333 (634 with no outgoing edge) |
 
 **No importer had to be written for this.** The upstream repository ships it
-alongside v630, so FlyBrain's data strategy reduces to "stage the two files, verify
+alongside v630, so MelanoGraph's data strategy reduces to "stage the two files, verify
 their hashes, derive a cache" — Option A in the objective. v783 is registered and
 validated but is not promoted to primary, because no published reference output
 exists for it.
@@ -147,7 +147,7 @@ neurons counted.
 
 **Honest gaps** — the `neuron_types_available` check reports `warn` unconditionally,
 because the dataset ships **no cell-type column**: the neuron table has a single
-`Completed` column. FlyBrain does not substitute a guess. Neuron types exist only
+`Completed` column. MelanoGraph does not substitute a guess. Neuron types exist only
 through the curated populations in §5, and every output that could be read as a
 type annotation says so.
 
@@ -203,7 +203,7 @@ file it was parsed from. The generator lives at the history of this repository's
 `_scratch/extract_populations.py` step and the resulting file is committed, so the
 lists can be re-derived and checked.
 
-This is the *only* neuron-type information available to FlyBrain. It is inherited
+This is the *only* neuron-type information available to MelanoGraph. It is inherited
 from the upstream authors' curation and is not independently verified.
 
 ---
@@ -211,7 +211,7 @@ from the upstream authors' curation and is not independently verified.
 ## 6. Reproducing the dataset layer
 
 ```bash
-# clone the upstream reference (read-only; FlyBrain never imports it)
+# clone the upstream reference (read-only; MelanoGraph never imports it)
 git clone --depth 1 https://github.com/philshiu/Drosophila_brain_model.git \
     third_party/Drosophila_brain_model
 
@@ -238,11 +238,11 @@ warning — see `tests/test_data.py::test_loader_refuses_a_truncated_file`.
   threshold 630. Non-proofread tissue is excluded, so the model's brain is not the
   whole animal's nervous system — no ventral nerve cord, no peripheral ganglia.
 * `Excitatory` is a **predicted** neurotransmitter identity, not a measurement. Its
-  accuracy is not characterised in the upstream repository and FlyBrain inherits it
+  accuracy is not characterised in the upstream repository and MelanoGraph inherits it
   unexamined.
 * Synapse counts come from automated synapse detection with upstream filtering; false
   positives and false negatives are both possible and are not quantified here.
 * The uniform 1.8 ms delay applied to every connection is physiologically
   implausible; it is upstream's modelling choice, retained for reproducibility.
 * FlyWire IDs are materialization-specific. A v630 ID is not guaranteed to resolve in
-  a later FlyWire release, and FlyBrain does not implement ID mapping across versions.
+  a later FlyWire release, and MelanoGraph does not implement ID mapping across versions.

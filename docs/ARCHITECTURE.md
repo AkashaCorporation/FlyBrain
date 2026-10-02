@@ -2,7 +2,7 @@
 
 **Status:** complete for v0
 
-FlyBrain is a package, not a collection of scripts. The boundaries below exist so
+MelanoGraph is a package, not a collection of scripts. The boundaries below exist so
 that the parts can be tested against each other and so that a future milestone (an
 environment, a decoder) can attach without reaching into the simulation's internals.
 
@@ -138,7 +138,7 @@ These are reported separately and must never be conflated:
 * `HardwareInfo.nvidia_gpus` — what `nvidia-smi` reports physically present;
 * `Backend.is_gpu` — whether the running process can actually use a GPU.
 
-On the machine FlyBrain v0 was developed on (GTX 1650, driver 591.86, CUDA 13.1,
+On the machine MelanoGraph v0 was developed on (GTX 1650, driver 591.86, CUDA 13.1,
 Windows 11), `jax.default_backend()` returns `'cpu'` and
 `jax.devices()` returns `[CpuDevice(id=0)]`, because CUDA-enabled `jaxlib` wheels are
 published for Linux only. The banner therefore prints:
@@ -230,7 +230,7 @@ output. Truncation is never silent: `Recorder.summary()` reports
 ## 8. Project layout
 
 ```
-FlyBrain/
+MelanoGraph/
 ├── README.md
 ├── pyproject.toml                 package + `flybrain` console script
 ├── requirements/{base,gpu}.txt

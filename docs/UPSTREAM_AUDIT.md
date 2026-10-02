@@ -1,11 +1,11 @@
-# UPSTREAM AUDIT — FlyBrain v0
+# UPSTREAM AUDIT — MelanoGraph v0
 
 **Status:** COMPLETE
 **Date:** 2026-09-28
-**Auditor:** FlyBrain v0 implementation pass
+**Auditor:** MelanoGraph v0 implementation pass
 
 This document records what was inspected in the upstream projects *before* implementing
-FlyBrain. Every claim below was verified by reading or executing the upstream artefacts;
+MelanoGraph. Every claim below was verified by reading or executing the upstream artefacts;
 where a number is given it was measured, not assumed. Uncertainties are flagged explicitly.
 
 ---
@@ -42,7 +42,7 @@ Files: `CAVE tutorial.ipynb`, `Neuropils and Point Lookups.ipynb`, `Renderings w
 **Findings (verified by reading README and the CAVE tutorial):**
 
 - The EM and segmentation volumes "are too large for conventional downloads" and require
-  `cloudvolume` subvolume reads. → **FlyBrain must never attempt a raw-volume download.**
+  `cloudvolume` subvolume reads. → **MelanoGraph must never attempt a raw-volume download.**
 - Programmatic connectome access is via **CAVE** (`caveclient`), datastack name
   **`flywire_fafb_public`**, hosted at `prod.flywire-daf.com`.
 - CAVE data is **versioned by materialization timestamp**; the client queries the latest
@@ -55,7 +55,7 @@ Files: `CAVE tutorial.ipynb`, `Neuropils and Point Lookups.ipynb`, `Renderings w
 - CAVE's `root_id` is the FlyWire segment/neuron ID.
 
 **Consequence for v0:** FlyConnectome is a *reference for where data comes from*, not a
-dependency. No CAVE client is installed and **no live network access is required to run FlyBrain**
+dependency. No CAVE client is installed and **no live network access is required to run MelanoGraph**
 (objective §2).
 
 ---
@@ -154,7 +154,7 @@ results confirm it: in `sugarR-720575940622695448.parquet` the silenced neuron
 
 ### 3.6 The `Excitatory x Connectivity` column is precomputed sign × count
 
-The dataset already carries the excitatory/inhibitory decision per connection, so **FlyBrain does
+The dataset already carries the excitatory/inhibitory decision per connection, so **MelanoGraph does
 not need to derive neurotransmitter identity**, and does not need a CAVE query, to obtain
 sign. See §5.
 
@@ -253,12 +253,12 @@ The completeness CSV is `index = FlyWire root ID`, single column `Completed = Tr
 | NaN / zero / negative `Connectivity` | 0 / 0 / 0 |
 | `Excitatory` distinct values | exactly `{-1, +1}` |
 
-Two consequences that shape FlyBrain's design:
+Two consequences that shape MelanoGraph's design:
 
 1. **Sign is a property of the presynaptic neuron, not of the individual connection.**
    No neuron has both excitatory and inhibitory outgoing edges. This is a Dale's-principle
    encoding: 86 543 purely excitatory and 40 472 purely inhibitory presynaptic neurons, which sum
-   to exactly the 127 015 neurons that have any outgoing edge. FlyBrain therefore reports
+   to exactly the 127 015 neurons that have any outgoing edge. MelanoGraph therefore reports
    "excitatory neurons" as *presynaptic neurons whose outgoing edges are excitatory*, and must
    record the remaining **385 neurons as `unknown_sign`** (no outgoing edge ⇒ no sign evidence).
 2. **The "~50 million synaptic connections" headline figure is the synapse count, not the edge
@@ -273,7 +273,7 @@ v630 is the version the paper used and the version for which published reference
 **No live network access is required after the files are present.** The objective's pipeline
 
 ```
-external FlyWire data -> import/preprocess -> versioned local dataset -> FlyBrain simulation
+external FlyWire data -> import/preprocess -> versioned local dataset -> MelanoGraph simulation
 ```
 
 collapses to "stage the two upstream files + verify hashes + derive a versioned processed CSR",
@@ -311,9 +311,9 @@ neurons in `sugarR_100Hz` "are all sugar-sensing neurons". Measured: `7205759406
 `neu_sugar` list is identical in repo 2 and repo 3's `figures.ipynb`, so this is a stale comment
 or a changed input list, not a data discrepancy.
 
-**This table is the acceptance target for FlyBrain's sugar experiment.** The objective only asks
+**This table is the acceptance target for MelanoGraph's sugar experiment.** The objective only asks
 for *qualitative* agreement ("known sensory neurons → stimulation → activity propagates → known
-downstream populations respond"), so FlyBrain's target is: sparse downstream activation
+downstream populations respond"), so MelanoGraph's target is: sparse downstream activation
 (order 10² active neurons), sugar GRNs firing at ≈ `r_poi`, and MN9 measurably driven.
 
 ---
@@ -345,7 +345,7 @@ downstream populations respond"), so FlyBrain's target is: sparse downstream act
    dataset without promoting it.
 2. **Data acquisition:** stage the upstream files; verify SHA-256; derive a processed CSR.
    No CAVE client, no live download required, no raw EM volume.
-3. **Do not depend on Brian 2 or brainstate/brainunit/brainevent.** FlyBrain implements the
+3. **Do not depend on Brian 2 or brainstate/brainunit/brainevent.** MelanoGraph implements the
    verified equations directly in NumPy (and optionally JAX). Rationale: (a) the objective forbids
    rewriting a validated simulator *unnecessarily* but explicitly requires our own clean
    `model/lif.py`/`model/network.py` and a project that "installs from scratch"; (b) `brainevent`
@@ -373,14 +373,14 @@ downstream populations respond"), so FlyBrain's target is: sparse downstream act
 ## 9. Open uncertainties (preserved, not resolved)
 
 - `w_syn = 0.275 mV` is a free parameter. Its value is not derived from measurement, and the
-  upstream comment "modulated by exponential decay" is unexplained. FlyBrain treats it as
+  upstream comment "modulated by exponential decay" is unexplained. MelanoGraph treats it as
   configurable and records it in every run.
 - Whether the paper's `method='linear'` and a hard threshold can drift from Brian 2's internal
   ordering in a way that changes spike identity at the single-timestep level is **not verified
   here**; bitwise agreement is not claimed.
 - The upstream connectivity table's synapse counts are for the *proofread* subset of the
   connectome (version 630, "completeness" threshold 630). Non-proofread tissue is excluded.
-  FlyBrain inherits this limitation.
+  MelanoGraph inherits this limitation.
 - `Excitatory` is a predicted neurotransmitter identity, not a measurement. Its accuracy is not
   characterised in the upstream repository and is inherited as-is.
 - The 1.8 ms uniform delay is physiologically implausible for a whole brain but is the upstream

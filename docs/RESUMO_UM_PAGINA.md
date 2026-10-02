@@ -1,7 +1,7 @@
 # Três estudos, uma pergunta — resumo para reunião
 
 **Data:** 2 de outubro de 2026
-**Repositório:** `github.com/AkashaCorporation/FlyBrain` (branch local `research/first-cycle-20260929`, ainda não enviado)
+**Repositório:** `github.com/AkashaCorporation/MelanoGraph` (branch local `research/first-cycle-20260929`, ainda não enviado)
 **Substrato:** conectoma real da mosca — FlyWire v783, 10 201 neurônios, 966 858 arestas
 **Todos os três pré-registrados e selados por hash antes de executar**
 **Todos os três: veredito POSITIVO pela regra pré-registrada**
@@ -116,8 +116,15 @@ Se couberem as duas, elas se completam: **necessária e insuficiente**.
 ## O rigor, e o que ele custou
 
 - **Pré-registro selado por SHA-256 antes de cada execução.** O script **recusa
-  rodar** se o documento não bater com o selo, e confere de novo depois. Cinco
-  revisões de registro, todas antes de qualquer dado, cada uma com o motivo.
+  rodar** se o documento não bater com o selo, e confere de novo depois. São
+  **8 selos no total** — 2 em C1, 5 em C2, 1 em C2B — dos quais **5 são revisões
+  posteriores à primeira gravação**, todas feitas antes de qualquer dado, cada uma
+  com o motivo registrado.
+- **Um hash do selo estava errado e foi declarado.** O hash da rev. 2 do C2 foi
+  transcrito à mão em vez de calculado; os 48 últimos caracteres não
+  correspondiam a nada, e o conteúdo daquela revisão não está em nenhum commit,
+  então é irre recuperável. Está marcado como não verificável em vez de apagado, e
+  a correção está escrita no próprio selo. As outras quatro conferem.
 - **Controles auditados antes de qualquer decodificação:** graus idênticos,
   divergência de Jensen-Shannon 0,0000 em grau e peso, 966 858 trocas aceitas,
   marginais de sinal preservadas. O controle é restrito a arestas de mesmo sinal e
@@ -144,9 +151,14 @@ era o que se achava que se media**:
    655 dimensões" era **um escalar**, e a primeira C2a foi invalidada.
 7. `evaluate()` reemitia a mensagem com a política do remetente enquanto o treino
    usava o circuito — o receptor aprendia certo e era avaliado noutro canal.
+8. **O hash da rev. 2 do pré-registro do C2 foi transcrito, não calculado.** Este
+   foi o único erro que atingiu o registro de proveniência em vez do código, e o
+   mais grave: um resultado errado se corrige, um hash falso destroi a confiança
+   em todo o registro.
 
-Cada um ganhou correção **e teste**. O padrão está escrito nos pré-registros, porque
-é o meu e precisa ficar visível.
+Cada um ganhou correção **e teste** — exceto o oitavo, que ganhou correção **e
+declaração**, porque não havia teste que pudesse pegá-lo. O padrão está escrito nos
+pré-registros, porque é o meu e precisa ficar visível.
 
 ---
 
