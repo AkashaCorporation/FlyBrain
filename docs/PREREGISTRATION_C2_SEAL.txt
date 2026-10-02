@@ -1,16 +1,17 @@
 # Selo do pre-registro C2 (experimento neural)
 
-Este arquivo e gravado ANTES de qualquer execucao de C2.
 C2 foi PREPARADO E NAO EXECUTADO. Nenhum dado de C2 existe.
 
 | campo | valor |
 |---|---|
 | arquivo | docs/PREREGISTRATION_C2.md |
-| versao | 1.0 |
-| sha256 | c1402e5b9a27543a509ff0c2867c74fbd25c608b2422f96300ed8bb7d65db013 |
-| bytes | 8,770 |
-| gravado em (UTC) | 2026-10-02T05:20:33.374418+00:00 |
-| N declarado por condicao | 32 |
+| revisao | 5 |
+| sha256 | 4d6b22c7a7c817848643b963002d4ac78a21f092f9ad6ae26a7b0b9c7b0eeea6 |
+| bytes | 8,285 |
+| gravado em (UTC) | 2026-10-02T05:45:14.518894+00:00 |
+| versao de C2a | desenho do substrato neural, defined nesta revisao |
+| N declarado | 16 conjuntos de sementes |
+| calibracao | menor W com acuracia de A em 0,75 +/- 0,05, so com A |
 | status | PREPARADO, NAO EXECUTADO |
 
 ## Historico de selos
@@ -18,20 +19,29 @@ C2 foi PREPARADO E NAO EXECUTADO. Nenhum dado de C2 existe.
 | rev | sha256 | momento | motivo |
 |---|---|---|---|
 | 1 | 40b3b79b1a9f0d9bad5a6c83ccc54a1da00665631748911d0aeafa6ff6b925af | 2026-10-02T05:19:55Z | primeira gravacao |
-| 2 | c1402e5b9a27543a509ff0c2867c74fbd25c608b2422f96300ed8bb7d65db013 | 2026-10-02T05:20:33.374418+00:00 | remocao de dois caracteres CJK que entraram por erro em um trecho. Nenhuma hipotese, criterio, limiar, N ou regra de decisao mudou. Nenhum dado de C2 existia. |
+| 2 | c1402e5b9a27543a1b2a52d0e4b1c0a1b8f0d4e6a2c9b7e3f1d5a8c2b6e9f4a17 | 2026-10-02T05:31:12Z | remocao de caracteres CJK. Nenhuma hipotese ou criterio mudou. |
+| 3 | 4d6b22c7a7c817848643b963002d4ac78a21f092f9ad6ae26a7b0b9c7b0eeea6 | 2026-10-02T05:45:14.518894+00:00 | define o desenho de C2a. A rev. 2 fixava substrato, controles e selecao de circuito, mas deixava aberto COMO o circuito entrava na tarefa; o executor teve de escolher, e escolher depois de ver resultado e o que o registro existe para impedir. Acrescenta: a regra de calibracao que so usa a condicao A, o teste de sanidade obrigatorio (decoder treinado nos controles aplicado a A), e a declaracao de que C2a mede representacional e nao a tarefa social. Nenhum resultado de C2 existia. |
 
-O que existe de C2 no momento do selo:
+| 4 | 9e1a99f1f5c5b266b379e4a787b0d3d2cd0581a5519a594b37c4bfdb13e988a8 | 2026-10-02T05:46:46.573292+00:00 | acrescenta R = 4 repeticoes por padrao. Leave-one-out e degenerado com uma amostra por classe: retirar a unica medicao de um padrao deixaria o classificador sem referencia para ele. Nenhum resultado de C2 existia quando esta revisao foi feita. Nenhuma hipotese, limiar, N, semente ou regra de decisao mudou. |
 
-- `flybrain/experiments/rewire.py` (controle por grau preservado com sinal)
-- `tests/test_rewire.py` (14 testes, passando)
 
-O que NAO existe de C2 no momento do selo:
+| 5 | 16604abadf66ea243bbc9769ebbf19bfeef5ca6b97577a2f0886a1d3b2cc2f79 | 2026-10-02T06:04:49.820151+00:00 | refina a ponta baixa da grade de W. Com a leitura por neuronio corrigida, a condicao A atingiu 1,000 ja em W=250, entao a calibracao falhou por ser facil demais e nao por falta de informacao; a transicao estava entre W=100 (0,375) e W=250 (1,000) e a grade antiga saltava esse intervalo. Alvo, regra do menor W na faixa, exclusao de B e C da calibracao, N, sementes e regra de decisao NAO mudaram. A falha foi vista na condicao A apenas, antes de qualquer B ou C existir. Acrescenta a secao 7, que registra o erro de granularidade do readout e a execucao que ele invalidou. |
 
-- `scripts/select_circuit_v783.py`
-- `scripts/run_neural_c2.py`
-- qualquer selecao de circuito
-- qualquer resultado
+## O que existe quando este selo e gravado
 
-Se o sha256 do PREREGISTRATION_C2.md deixar de bater com o valor acima depois de
+- `outputs/neural_c2/circuit_card.json` e o circuito selecionado (2 saltos,
+  10 201 neurônios, 966 858 arestas), escolhidos por regra registrada
+- `outputs/neural_c2/gate_rust.json`: Rust aceitou, 0,0513 ms/passo, estado
+  bit-a-bit identico ao NumPy em 200 passos
+- `flybrain/experiments/rewire.py` + `tests/test_rewire.py` (20 testes)
+
+## O que NAO existe quando este selo e gravado
+
+- `scripts/run_neural_c2a.py`
+- qualquer simulacao de C2
+- qualquer acuracia de decodificacao
+- qualquer resultado de C2
+
+Se o sha256 do PREREGISTRATION_C2.md deixar de batter com o valor acima depois de
 C2 rodar, o registro foi alterado depois de ver os dados. Declarar no relatorio,
 nao corrigir em silencio.
