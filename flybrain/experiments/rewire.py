@@ -77,6 +77,12 @@ def degree_preserving_rewire(
     edges carrying the same sign, so each target keeps the same mix of
     excitation and inhibition it had.
 
+    Edges are bucketed by sign into excitatory, inhibitory and unknown (sign 0).
+    The unknown bucket exists because the v0 connectome carries 385 neurons whose
+    sign is undefined, and an edge that belongs to no bucket would simply never
+    move - leaving the rewired graph partly unmixed while still reporting success.
+    Bucketing all three keeps every edge in play.
+
     Returns (pre, post, sign, report). Input arrays are not mutated.
     """
     rng = np.random.default_rng(seed)
@@ -84,6 +90,19 @@ def degree_preserving_rewire(
     post = np.ascontiguousarray(post, dtype=np.int64)
     sign = np.ascontiguousarray(sign, dtype=np.int8)
     m = len(pre)
+    if m == 0:
+        raise ValueError("nothing to rewire: edge list is empty")
+    if len(post) != m or len(sign) != m:
+        raise ValueError("pre, post and sign must have the same length")
+    if n_neurons <= 0:
+        raise ValueError(f"n_neurons must be positive, got {n_neurons}")
+    if len(pre) and (pre.max() >= n_neurons or post.max() >= n_neurons):
+        raise ValueError(
+            f"edge endpoint out of range: n_neurons={n_neurons} but indices reach "
+            f"{int(max(pre.max(), post.max()))}"
+        )
+    if max_attempts < 1:
+        raise ValueError(f"max_attempts must be positive, got {max_attempts}")
 
     in_before = np.bincount(post, minlength=n_neurons)
     out_before = np.bincount(pre, minlength=n_neurons)
@@ -106,15 +125,26 @@ def degree_preserving_rewire(
     present = set((pre * n_neurons + targets).tolist())
 
     # bucket edges by sign so a swap never crosses the excitatory/inhibitory split
-    pos_edges = np.nonzero(sign > 0)[0]
-    neg_edges = np.nonzero(sign < 0)[0]
+    # three buckets, not two: an edge with sign 0 must still be able to move
+    buckets = {
+        1: np.nonzero(sign > 0)[0],
+        -1: np.nonzero(sign < 0)[0],
+        0: np.nonzero(sign == 0)[0],
+    }
+    usable = [k for k, v in buckets.items() if len(v) >= 2]
+    if not usable:
+        raise ValueError(
+            "no sign bucket has at least two edges, so no swap is possible; "
+            "the graph is too small or too uniformly signed to rewire"
+        )
+    probs = np.array([len(buckets[k]) for k in usable], dtype=np.float64)
+    probs = probs / probs.sum()
 
     accepted = 0
     rejected_duplicate = 0
     for _ in range(max_attempts):
-        pool = pos_edges if rng.random() < (len(pos_edges) / max(m, 1)) else neg_edges
-        if len(pool) < 2:
-            continue
+        key = usable[int(rng.choice(len(usable), p=probs))]
+        pool = buckets[key]
         e1, e2 = rng.choice(pool, size=2, replace=False)
         p1, t1 = pre[e1], targets[e1]
         p2, t2 = pre[e2], targets[e2]

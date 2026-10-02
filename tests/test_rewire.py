@@ -153,3 +153,59 @@ def test_degree_vectors_survive_many_rewires(seed):
         assert rep.in_degree_preserved and rep.out_degree_preserved
         assert np.array_equal(np.bincount(p2, minlength=n), out_ref)
         assert np.array_equal(np.bincount(q2, minlength=n), in_ref)
+
+
+# --- the silent-degeneracy class, locked down --------------------------------
+
+
+def test_unknown_sign_edges_also_move():
+    """sign == 0 edges must be rewireable, not stranded.
+
+    The v0 connectome has 385 neurons with undefined sign. An edge belonging to
+    no sign bucket would never move, leaving the graph partly unmixed while
+    still reporting success - the same shape as the annotation-filter bug.
+    """
+    n = 30
+    rng = np.random.default_rng(31)
+    pre = rng.integers(0, n, 300).astype(np.int64)
+    post = rng.integers(0, n, 300).astype(np.int64)
+    keep = pre != post
+    pre, post = pre[keep][:120], post[keep][:120]
+    sign = np.zeros(len(pre), np.int8)  # every edge unknown-sign
+    _p, _q, _s, rep = degree_preserving_rewire(pre, post, sign, n, seed=32,
+                                                max_attempts=20_000)
+    assert rep.swap_accepted > 0, "unknown-sign edges were stranded"
+    assert rep.in_degree_preserved and rep.out_degree_preserved
+
+
+def test_rejects_an_empty_edge_list_instead_of_spinning():
+    with pytest.raises(ValueError, match="empty"):
+        degree_preserving_rewire(np.empty(0, np.int64), np.empty(0, np.int64),
+                                 np.empty(0, np.int8), 3, seed=33)
+
+
+def test_rejects_out_of_range_endpoints_with_a_readable_message():
+    pre = np.array([0, 1, 2], np.int64)
+    post = np.array([1, 2, 0], np.int64)
+    sign = np.ones(3, np.int8)
+    with pytest.raises(ValueError, match="out of range"):
+        degree_preserving_rewire(pre, post, sign, 2, seed=34)
+
+
+def test_rejects_mismatched_array_lengths():
+    with pytest.raises(ValueError, match="same length"):
+        degree_preserving_rewire(np.array([0], np.int64), np.array([1, 2], np.int64),
+                                 np.array([1], np.int8), 3, seed=35)
+
+
+def test_rejects_a_graph_too_small_to_rewire():
+    """One edge per sign bucket means no swap exists; say so, do not return junk."""
+    with pytest.raises(ValueError, match="no sign bucket"):
+        degree_preserving_rewire(np.array([0, 1], np.int64), np.array([1, 2], np.int64),
+                                 np.array([1, -1], np.int8), 3, seed=36)
+
+
+def test_rejects_non_positive_max_attempts():
+    with pytest.raises(ValueError, match="max_attempts"):
+        degree_preserving_rewire(np.array([0, 1], np.int64), np.array([1, 2], np.int64),
+                                 np.array([1, 1], np.int8), 3, seed=37, max_attempts=0)
