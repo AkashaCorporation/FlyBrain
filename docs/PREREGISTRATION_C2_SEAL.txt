@@ -1,0 +1,37 @@
+# Selo do pre-registro C2 (experimento neural)
+
+Este arquivo e gravado ANTES de qualquer execucao de C2.
+C2 foi PREPARADO E NAO EXECUTADO. Nenhum dado de C2 existe.
+
+| campo | valor |
+|---|---|
+| arquivo | docs/PREREGISTRATION_C2.md |
+| versao | 1.0 |
+| sha256 | c1402e5b9a27543a509ff0c2867c74fbd25c608b2422f96300ed8bb7d65db013 |
+| bytes | 8,770 |
+| gravado em (UTC) | 2026-10-02T05:20:33.374418+00:00 |
+| N declarado por condicao | 32 |
+| status | PREPARADO, NAO EXECUTADO |
+
+## Historico de selos
+
+| rev | sha256 | momento | motivo |
+|---|---|---|---|
+| 1 | 40b3b79b1a9f0d9bad5a6c83ccc54a1da00665631748911d0aeafa6ff6b925af | 2026-10-02T05:19:55Z | primeira gravacao |
+| 2 | c1402e5b9a27543a509ff0c2867c74fbd25c608b2422f96300ed8bb7d65db013 | 2026-10-02T05:20:33.374418+00:00 | remocao de dois caracteres CJK que entraram por erro em um trecho. Nenhuma hipotese, criterio, limiar, N ou regra de decisao mudou. Nenhum dado de C2 existia. |
+
+O que existe de C2 no momento do selo:
+
+- `flybrain/experiments/rewire.py` (controle por grau preservado com sinal)
+- `tests/test_rewire.py` (14 testes, passando)
+
+O que NAO existe de C2 no momento do selo:
+
+- `scripts/select_circuit_v783.py`
+- `scripts/run_neural_c2.py`
+- qualquer selecao de circuito
+- qualquer resultado
+
+Se o sha256 do PREREGISTRATION_C2.md deixar de bater com o valor acima depois de
+C2 rodar, o registro foi alterado depois de ver os dados. Declarar no relatorio,
+nao corrigir em silencio.

@@ -1,0 +1,29 @@
+# Selo do pre-registro C1
+
+Este arquivo e gravado ANTES de qualquer semente do estudo C1.
+Ele existe para que a ordem temporal seja verificavel, nao presumida.
+
+| campo | valor |
+|---|---|
+| arquivo | docs/PREREGISTRATION_C1.md |
+| versao | 1.0 |
+| sha256 | bacbb3262389b5c3895f1f912706859bad79d88e30042aa6d5ecea64d9a731be |
+| bytes | 9,302 |
+| gravado em (UTC) | 2026-10-02T05:15:17.358265+00:00 |
+| N declarado | 64 |
+| semente do bootstrap | 20261002 |
+
+## Historico de selos
+
+| rev | sha256 | momento | motivo |
+|---|---|---|---|
+| 1 | 92b3815a2f984a8c77b86783e0c7868847f5aca6faf64955ef0a7a8d89b68441 | 2026-10-02T05:13:23Z | primeira gravacao |
+| 2 | bacbb3262389b5c3895f1f912706859bad79d88e30042aa6d5ecea64d9a731be | 2026-10-02T05:15:17.358265+00:00 | correcao de descricao do protocolo: a avaliacao usa repeats=64 condicoes por tipo sobre produto cartesiano exato, nao 512 episodios. Nenhum dado do estudo existia quando esta revisao foi feita. |
+
+Nenhuma hipotese, limiar, N, semente ou regra de decisao mudou entre as revisoes.
+As duas alteracoes sao de descricao do protocolo de avaliacao, e a revisao 2
+ocorreu antes de qualquer treino.
+
+Se o sha256 do PREREGISTRATION_C1.md deixar de bater com o valor acima depois do
+estudo, o pre-registro foi alterado depois de ver os dados. Isso deve ser
+declarado no relatorio, nao corrigido em silencio.
